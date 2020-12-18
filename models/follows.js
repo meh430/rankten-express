@@ -1,4 +1,4 @@
-const followsTable =
+const createFollowsTable =
     "CREATE TABLE IF NOT EXISTS Follows(" +
     "userId int NOT NULL," + 
     "followsId int NOT NULL," +
