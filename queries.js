@@ -23,11 +23,11 @@ function getUserQuery(userId) {
         countFollowersQuery(userId) + ") AS numFollowers FROM Users WHERE Users.userId = ?", [userId]);
 }
 
-function getFollowingQuery(userId) {
+function getFollowingIdsQuery(userId) {
     return mysql.format("SELECT followsId FROM Follows WHERE userId = ?", [userId]);
 }
 
-function getFollowersQuery(userId) {
+function getFollowerIdsQuery(userId) {
     return mysql.format("SELECT userId FROM Follows WHERE followsId = ?", [userId]);
 }
 
@@ -52,22 +52,26 @@ function deleteCommentQuery(commentId) {
     return mysql.format("DELETE FROM Comments WHERE commentId = ?", [commentId]);
 }
 
-const selectCommentAttributes = "SELECT Comments.*, Users.username, Users.profilePic, " +
+const commentAttributes = "SELECT Comments.*, Users.username, Users.profilePic, " +
     "(SELECT COUNT(CommentLikes.userId) FROM CommentLikes WHERE" +
     "CommentLikes.commentId = Comments.commentId) AS numLikes ";
 
+function page(page) {
+    return " LIMIT " + page[0] + " OFFSET " + page[1];
+}
+
 function sortAndPage(sort, page) {
-    return " ORDER BY " + sort + " LIMIT " + page[0] + " OFFSET " + page[1];
+    return " ORDER BY " + sort + page(page);
 }
 
 function getListCommentsQuery(listId, sort, page) {
-    return mysql.format(selectCommentAttributes +
+    return mysql.format(commentAttributes +
         "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
         "WHERE Comments.listId = ?" + sortAndPage(sort, page), [listId]);
 }
 
 function getUserCommentsQuery(userId, sort, page) {
-    return mysql.format(selectCommentAttributes +
+    return mysql.format(commentAttributes +
         "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
         "WHERE Comments.userId = ?" + sortAndPage(sort, page), [userId]);
 }
@@ -103,8 +107,37 @@ function getFollowingQuery(userId) {
         "FROM Follows JOIN Users ON Follows.followsId = Users.userId WHERE Follows.userId = ?", [userId]);
 }
 
-function getFollowingQuery(userId) {
+function getFollowersQuery(userId) {
     return mysql.format(userPreviewAttributes +
         "FROM Follows JOIN Users ON Follows.userId = Users.userId WHERE Follows.followsId = ?", [userId]);
 }
 
+function unlikeListQuery(userId, listId) {
+    return mysql.format("DELETE FROM ListLikes WHERE userId = ? AND listId = ?", [userId, listId]);
+}
+
+function likeListQuery(userId, listId) {
+    return mysql.format("INSERT INTO ListLikes SET userId = ?, listId = ?", [userId, listId]);
+}
+
+function unlikeCommentQuery(userId, commentId) {
+    return mysql.format("DELETE FROM CommentLikes WHERE userId = ? AND commentId = ?", [userId, commentId]);
+}
+
+function likeCommentQuery(userId, commentId) {
+    return mysql.format("INSERT INTO CommentLikes SET userId = ?, commentId = ?", [userId, commentId]);
+}
+
+function getLikedListsQuery(userId, page) {
+    return mysql.format(rankedListAttributes +
+        "FROM ListLikes JOIN RankedLists ON ListLikes.listId = RankedLists.listId " +
+        "JOIN Users ON RankedLists.userId = Users.userId WHERE ListLikes.userId = ?" +
+        page(page), [userId]);
+}
+
+function getLikedCommentsQuery(userId, page) {
+    return mysql.format(commentAttributes +
+        "FROM CommentLikes JOIN Comments ON CommentLikes.commentId = Comments.commentId " +
+        "JOIN Users ON Comments.userId = Users.userId WHERE CommentLikes.userId = ?" +
+        page(page), [userId]);
+}
