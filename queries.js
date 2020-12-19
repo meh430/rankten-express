@@ -9,11 +9,11 @@ function countUserCommentsQuery(userId) {
 }
 
 function countFollowersQuery(userId) {
-    return mysql.format("SELECT COUNT(Follows.userId) FROM Follows WHERE Follows.followId = ?", [userId]);
+    return mysql.format("SELECT COUNT(Follows.userId) FROM Follows WHERE Follows.followsId = ?", [userId]);
 }
 
 function countFollowingQuery(userId) {
-    return mysql.format("SELECT COUNT(Follows.followId) FROM Follows WHERE Follows.userId = ?", [userId]);
+    return mysql.format("SELECT COUNT(Follows.followsId) FROM Follows WHERE Follows.userId = ?", [userId]);
 }
 
 function getUserQuery(userId) {
@@ -28,7 +28,7 @@ function getFollowingQuery(userId) {
 }
 
 function getFollowersQuery(userId) {
-    return mysql.format("SELECT userId FROM Follows WHERE followId = ?", [userId]);
+    return mysql.format("SELECT userId FROM Follows WHERE followsId = ?", [userId]);
 }
 
 function getLikedListIdsQuery(userId) {
@@ -70,5 +70,41 @@ function getUserCommentsQuery(userId, sort, page) {
     return mysql.format(selectCommentAttributes +
         "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
         "WHERE Comments.userId = ?" + sortAndPage(sort, page), [userId]);
+}
+
+function getRankItemsPreviewQuery(listId) {
+    return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY rank ASC LIMIT 3", [listId]);
+}
+
+const rankedListAttributes = "SELECT RankedLists.*, Users.username, Users.profilePic, " +
+    "(SELECT COUNT(ListLikes.userId) FROM ListLikes WHERE ListLikes.listId = RankedLists.listId) AS numLikes, " +
+    "(SELECT COUNT(Comments.commentId) FROM Comments WHERE Comments.listId = RankedLists.listId) AS numComments ";
+
+function getDiscoverQuery(sort, page) {
+    return rankedListAttributes +
+        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+        "WHERE RankedLists.private = false" + sortAndPage(sort, page);
+}
+
+function unfollowQuery(userId, targetId) {
+    return mysql.format("DELETE FROM Follows WHERE userId = ? AND followsId = ?",
+        [userId, targetId]);
+}
+
+function followQuery(userId, targetId) {
+    return mysql.format("INSERT INTO Follows SET userId = ?, followsId = ?", [userId, targetId]);
+}
+
+const userPreviewAttributes =
+    "SELECT Users.userId, Users.username, Users.profilePic, Users.bio, Users.rankPoints ";
+
+function getFollowingQuery(userId) {
+    return mysql.format(userPreviewAttributes +
+        "FROM Follows JOIN Users ON Follows.followsId = Users.userId WHERE Follows.userId = ?", [userId]);
+}
+
+function getFollowingQuery(userId) {
+    return mysql.format(userPreviewAttributes +
+        "FROM Follows JOIN Users ON Follows.userId = Users.userId WHERE Follows.followsId = ?", [userId]);
 }
 
