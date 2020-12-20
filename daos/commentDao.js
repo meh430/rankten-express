@@ -30,4 +30,13 @@ async function deleteComment(connection, commentId, userId) {
     utils.checkRow();
 }
 
-module.exports = { createComment, updateComment, deleteComment };
+async function getListComments(connection, listId, page, sort) {
+    const comments = await sql.query(connection, queries.getListCommentsQuery(listId, utils.limitAndOffset(page), utils.getSort(sort)));
+    console.log(comments);
+
+    return utils.validatePage(comments);
+}
+
+
+
+module.exports = { createComment, updateComment, deleteComment, getListComments };
