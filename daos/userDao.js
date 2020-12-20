@@ -9,8 +9,9 @@ const passwordPattern = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-
 
 async function createUser(connection, user) {
     delete user.userId;
-    delete user.dateCreated;
     delete user.rankPoints;
+
+    user.dateCreated = Date.now();
 
     if (!user.username.match(namePattern) || !user.password.match(passwordPattern)) {
         throw errors.invalidCredentialsError();
