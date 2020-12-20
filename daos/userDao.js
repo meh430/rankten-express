@@ -111,5 +111,11 @@ async function getListLikers(connection, listId) {
     return likers;
 }
 
+async function searchUsers(connection, query, page, sort) {
+    const users = await sql.query(connection, queries.searchUsersQuery(query, utils.limitAndOffset(page), utils.getSort(sort)));
+    console.log(users);
+
+    return users;
+}
 
 module.exports = { createUser, updateUser, deleteUser, getUser, follow, getFollowing, getFollowers, getListLikers };
