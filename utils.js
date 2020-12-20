@@ -34,4 +34,10 @@ function validatePage(results) {
     return results;
 }
 
-module.exports = { limitAndOffset, getSort, validatePage };
+function checkRow(result) {
+    if (result.affectedRows === 0) {
+        throw errors.notFoundError();
+    }
+}
+
+module.exports = { limitAndOffset, getSort, validatePage, checkRow };

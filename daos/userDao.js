@@ -7,6 +7,8 @@ const utils = require("../utils");
 const namePattern = /^[a-z0-9_-]{3,15}$/g;
 const passwordPattern = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/g;
 
+// TODO: do not found checks in getters
+
 async function createUser(connection, user) {
     delete user.userId;
     delete user.rankPoints;
@@ -36,18 +38,14 @@ async function updateUser(connection, userId, user) {
     const res = await sql.query(connection, queries.updateUserQuery(userId, user));
     console.log(res);
 
-    if (res.affectedRows === 0) {
-        throw errors.notFoundError();
-    }
+    utils.checkRow(res);
 }
 
 async function deleteUser(connection, userId) {
     const res = await sql.query(connection, queries.deleteUserQuery(userId));
     console.log(res);
 
-    if (res.dateCreated === 0) {
-        throw errors.notFoundError();
-    }
+    utils.checkRow(res);
 }
 
 async function getUser(connection, userId, private) {
@@ -74,18 +72,14 @@ async function follow(connection, userId, targetId) {
         const unfollowed = await sql.query(connection, queries.unfollowQuery(userId, targetId));
         console.log(unfollowed);
 
-        if (unfollowed.affectedRows === 0) {
-            throw errors.notFoundError();
-        }
+        utils.checkRow(unfollowed);
 
         return "unfollowed user";
     } else {
         const followed = await sql.query(connection, queries.followQuery(userId, targetId));
         console.log(followed);
 
-        if (followed.affectedRows === 0) {
-            throw errors.notFoundError();
-        }
+        utils.checkRow(followed);
 
         return "followed user";
     }

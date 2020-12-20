@@ -16,4 +16,18 @@ async function createComment(connection, comment, userId, listId) {
     return res.insertId;
 }
 
-module.exports = { createComment };
+async function updateComment(connection, commentId, userId, comment) {
+    const res = await sql.query(connection, queries.updateCommentQuery(commentId, userId, comment));
+    console.log(res);
+
+    utils.checkRow(res);
+}
+
+async function deleteComment(connection, commentId, userId) {
+    const res = await sql.query(connection, queries.deleteCommentQuery(commentId, userId));
+    console.log(res);
+
+    utils.checkRow();
+}
+
+module.exports = { createComment, updateComment, deleteComment };
