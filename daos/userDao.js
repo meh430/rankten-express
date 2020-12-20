@@ -118,4 +118,4 @@ async function searchUsers(connection, query, page, sort) {
     return users;
 }
 
-module.exports = { createUser, updateUser, deleteUser, getUser, follow, getFollowing, getFollowers, getListLikers };
+module.exports = { createUser, updateUser, deleteUser, getUser, follow, getFollowing, getFollowers, getListLikers, searchUsers };
