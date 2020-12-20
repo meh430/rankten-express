@@ -39,8 +39,13 @@ async function updateUser(connection, userId, user) {
     }
 }
 
-async function deleteUser(connection, user) {
+async function deleteUser(connection, userId) {
+    const res = await sql.query(connection, queries.deleteUserQuery(userId));
+    console.log(res);
 
+    if (res.dateCreated === 0) {
+        throw errors.notFoundError();
+    }
 }
 
 async function getUser(connection, user, private) {
