@@ -215,19 +215,23 @@ function updateRankedListQuery(rankedList, listId) {
 }
 
 function updateRankItemQuery(rankItem, itemId, listId) {
-    return mysql.format("UPDATE RankItems SET ? WHERE itemId = ? AND listId = ?", [rankItem, itemId, listId]);
+    return mysql.format("UPDATE RankItems SET ? WHERE itemId = ?", [rankItem, itemId]);
 }
 
 function createRankItemQuery(rankItem) {
     return mysql.format("INSERT INTO RankItems SET ?", [rankItem]);
 }
 
-function deleteRankItemQuery(itemId, listId) {
-    return mysql.format("DELETE FROM RankItems WHERE itemId = ? AND listId = ?", [itemId, listId]);
+function deleteRankItemQuery(itemId) {
+    return mysql.format("DELETE FROM RankItems WHERE itemId = ?", [itemId]);
 }
 
 function deleteRankedListQuery(listId, userId) {
     return mysql.format("DELETE FROM RankedLists WHERE listId = ? AND userId = ?", [listId, userId]);
+}
+
+function deleteListRankItemsQuery(listId) {
+    return mysql.format("DELETE FROM RankItems WHERE listId = ?", [listId]);
 }
 
 function createRankedListQuery(rankedList) {
@@ -371,6 +375,7 @@ module.exports = {
     updateRankItemQuery,
     createRankItemQuery,
     deleteRankItemQuery,
+    deleteListRankItemsQuery,
     deleteRankedListQuery,
     createRankedListQuery,
     getUserRankedListsQuery,

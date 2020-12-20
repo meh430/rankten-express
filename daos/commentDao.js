@@ -1,6 +1,5 @@
 const queries = require("../queries");
 const sql = require("../models/sqlPromise");
-const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
 async function createComment(connection, comment, userId, listId) {
