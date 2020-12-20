@@ -24,7 +24,7 @@ async function getPictureAndThree(connection, listId) {
     return [items, numItems, picture];
 }
 
-function getRankedListPreviews(connection, rankedLists) {
+async function getRankedListPreviews(connection, rankedLists) {
     const previews = [];
 
     for (let i = 0; i < rankedLists.length; i++) {
@@ -49,4 +49,13 @@ function getRankedListPreviews(connection, rankedLists) {
     }
 
     return previews;
+}
+
+async function getDiscoverLists(connection, page, sort) {
+    const discoverLists = await sql.query(connection, queries.getDiscoverQuery(utils.limitAndOffset(page), utils.getSort(sort)));
+    console.log(discoverLists);
+
+    const discoverPreviews = await getRankedListPreviews(connection, discoverLists);
+    console.log(discoverPreviews);
+    return discoverPreviews;
 }

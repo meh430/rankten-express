@@ -393,4 +393,5 @@ module.exports = {
     searchRankItemsQuery,
     countSearchListsQuery,
     searchListsQuery,
+    page
 };
