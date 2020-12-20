@@ -107,7 +107,7 @@ async function getListLikers(connection, listId) {
 }
 
 async function searchUsers(connection, query, page, sort) {
-    const users = await sql.query(connection, queries.searchUsersQuery(query, utils.limitAndOffset(page, 100), utils.getSort(sort)));
+    const users = await sql.query(connection, queries.searchUsersQuery(query, utils.limitAndOffset(page, 100), utils.getSort(sort, true)));
     console.log(users);
 
     return utils.validatePage(users);

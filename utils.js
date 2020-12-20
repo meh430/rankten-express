@@ -22,7 +22,7 @@ function getSort(sort, user = false) {
         case oldest:
             return sortOptions.oldest;
         default:
-            throw errors.badRequest();
+            throw "";
     }
 }
 
