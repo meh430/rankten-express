@@ -226,12 +226,18 @@ function deleteRankItemQuery(itemId) {
     return mysql.format("DELETE FROM RankItems WHERE itemId = ?", [itemId]);
 }
 
-function deleteRankedListQuery(listId, userId) {
-    return mysql.format("DELETE FROM RankedLists WHERE listId = ? AND userId = ?", [listId, userId]);
-}
-
 function deleteListRankItemsQuery(listId) {
     return mysql.format("DELETE FROM RankItems WHERE listId = ?", [listId]);
+}
+
+function getCommentPreview(listId) {
+    return mysql.format("SELECT Comments.comment, Comments.dateCreated, Users.username, " +
+        "Users.profilePic, FROM Comments JOIN Users ON " +
+        "Comments.userId = Users.userId WHERE Comments.listId = ? LIMIT 1", [listId]);
+}
+
+function deleteRankedListQuery(listId, userId) {
+    return mysql.format("DELETE FROM RankedLists WHERE listId = ? AND userId = ?", [listId, userId]);
 }
 
 function createRankedListQuery(rankedList) {
@@ -376,6 +382,7 @@ module.exports = {
     createRankItemQuery,
     deleteRankItemQuery,
     deleteListRankItemsQuery,
+    getCommentPreview,
     deleteRankedListQuery,
     createRankedListQuery,
     getUserRankedListsQuery,

@@ -43,4 +43,5 @@ async function getUserComments(connection, userId, page, sort) {
     return utils.validatePage(comments);
 }
 
+
 module.exports = { createComment, updateComment, deleteComment, getListComments, getUserComments };
