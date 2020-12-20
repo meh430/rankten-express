@@ -1,5 +1,7 @@
 const mysql = require('mysql');
 
+// Whenever creating a row, make sure to add appropriate foreign keys
+
 function createUserQuery(user) {
     return mysql.format("INSERT INTO Users SET ?", [user]);
 }
@@ -72,20 +74,20 @@ function page(page) {
     return " LIMIT " + page[0] + " OFFSET " + page[1];
 }
 
-function sortAndPage(sort, page) {
+function sortAndPage(page, sort) {
     return " ORDER BY " + sort + page(page);
 }
 
-function getListCommentsQuery(listId, sort, page) {
+function getListCommentsQuery(listId, page, sort) {
     return mysql.format(commentAttributes +
         "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
-        "WHERE Comments.listId = ?" + sortAndPage(sort, page), [listId]);
+        "WHERE Comments.listId = ?" + sortAndPage(page, sort), [listId]);
 }
 
-function getUserCommentsQuery(userId, sort, page) {
+function getUserCommentsQuery(userId, page, sort) {
     return mysql.format(commentAttributes +
         "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
-        "WHERE Comments.userId = ?" + sortAndPage(sort, page), [userId]);
+        "WHERE Comments.userId = ?" + sortAndPage(page, sort), [userId]);
 }
 
 function getRankItemsPreviewQuery(listId) {
@@ -96,10 +98,10 @@ const rankedListAttributes = "SELECT RankedLists.*, Users.username, Users.profil
     "(SELECT COUNT(ListLikes.userId) FROM ListLikes WHERE ListLikes.listId = RankedLists.listId) AS numLikes, " +
     "(SELECT COUNT(Comments.commentId) FROM Comments WHERE Comments.listId = RankedLists.listId) AS numComments ";
 
-function getDiscoverQuery(sort, page) {
+function getDiscoverQuery(page, sort) {
     return rankedListAttributes +
         "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.private = false" + sortAndPage(sort, page);
+        "WHERE RankedLists.private = false" + sortAndPage(page, sort);
 }
 
 function unfollowQuery(userId, targetId) {
@@ -192,17 +194,17 @@ function createRankedListQuery(rankedList) {
     return mysql.format("INSERT INTO RankedLists SET ?", [rankedList]);
 }
 
-function getUserRankedListsQuery(userId, sort, page) {
+function getUserRankedListsQuery(userId, page, sort) {
     return mysql.format(rankedListAttributes +
         "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
         "WHERE RankedLists.private = false AND RankedLists.userId = ?" +
-        sortAndPage(sort, page), [userId]);
+        sortAndPage(page, sort), [userId]);
 }
 
-function getAllUserRankedListsQuery(userId, sort, page) {
+function getAllUserRankedListsQuery(userId, page, sort) {
     return mysql.format(rankedListAttributes +
         "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.userId = ?" + sortAndPage(sort, page), [userId]);
+        "WHERE RankedLists.userId = ?" + sortAndPage(page, sort), [userId]);
 }
 
 function getFeedQuery(userId, lastDay) {
@@ -216,11 +218,11 @@ function countSearchUsersQuery(query) {
         "WHERE MATCH(Users.username, Users.bio) AGAINST(? IN NATURAL LANGUAGE MODE)", [query]);
 }
 
-function searchUsersQuery(query, sort, page) {
+function searchUsersQuery(query, page, sort) {
     if (sort) {
         return userPreviewAttributes +
             mysql.format("FROM Users WHERE MATCH(Users.username, Users.bio) " +
-                "AGAINST(? IN NATURAL LANGUAGE MODE)" + sortAndPage(sort, page), [query]);
+                "AGAINST(? IN NATURAL LANGUAGE MODE)" + sortAndPage(page, sort), [query]);
     } else {
         return userPreviewAttributes +
             mysql.format("FROM Users WHERE MATCH(Users.username, Users.bio) " +
@@ -240,10 +242,10 @@ function countSearchListsQuery(query) {
         ") AS search JOIN RankedLists ON search.lId = RankedLists.listId");
 }
 
-function searchListsQuery(query, sort, page) {
+function searchListsQuery(query, page, sort) {
     if (sort) {
         return rankedListAttributes + "FROM (" + searchRankItemsQuery(query) +
-            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + sortAndPage(sort, page); 
+            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + sortAndPage(page, sort); 
     } else {
         return rankedListAttributes + "FROM (" + searchRankItemsQuery(query) +
             ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + page(page);
