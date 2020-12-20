@@ -66,4 +66,29 @@ async function getUser(connection, userId, private) {
     return userInfo;
 }
 
+async function follow(connection, userId, targetId) {
+    const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
+
+    if (following.includes(targetId)) {
+        const unfollowed = await sql.query(connection, queries.unfollowQuery(userId, targetId));
+        console.log(unfollowed);
+
+        if (unfollowed.affectedRows === 0) {
+            throw errors.notFoundError();
+        }
+
+        return "unfollowed user";
+    } else {
+        const followed = await sql.query(connection, queries.followQuery(userId, targetId));
+        console.log(followed);
+
+        if (followed.affectedRows === 0) {
+            throw errors.notFoundError();
+        }
+
+        return "followed user";
+    }
+}
+
+
 module.exports = { createUser, updateUser, deleteUser, getUser };
