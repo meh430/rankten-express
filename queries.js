@@ -1,5 +1,17 @@
 const mysql = require('mysql');
 
+function createUserQuery(user) {
+    return mysql.format("INSERT INTO Users SET ?", [user]);
+}
+
+function deleteUserQuery(userId) {
+    return mysql.format("DELETE FROM Users WHERE userId = ?", [userId]);
+}
+
+function updateUserQuery(userId, user) {
+    return mysql.format("UPDATE Users SET ? WHERE userId = ?", [user, userId]);
+} 
+
 function countUserListsQuery(userId) {
     return mysql.format("SELECT COUNT(RankedLists.listId) FROM RankedLists WHERE RankedLists.userId = ?", [userId]);
 }
@@ -43,13 +55,13 @@ function createCommentQuery(comment) {
     return mysql.format("INSERT INTO Comments SET ?", [comment]);
 }
 
-function updateCommentQuery(commentId, comment) {
-    return mysql.format("UPDATE Comments SET comment = ? WHERE commentId = ?",
-        [comment, commentId]);
+function updateCommentQuery(commentId, userId, comment) {
+    return mysql.format("UPDATE Comments SET comment = ? WHERE userId = ? AND commentId = ?",
+        [comment, userId, commentId]);
 }
 
-function deleteCommentQuery(commentId) {
-    return mysql.format("DELETE FROM Comments WHERE commentId = ?", [commentId]);
+function deleteCommentQuery(commentId, userId) {
+    return mysql.format("DELETE FROM Comments WHERE commentId = ? AND userId = ?", [commentId, userId]);
 }
 
 const commentAttributes = "SELECT Comments.*, Users.username, Users.profilePic, " +
@@ -140,4 +152,100 @@ function getLikedCommentsQuery(userId, page) {
         "FROM CommentLikes JOIN Comments ON CommentLikes.commentId = Comments.commentId " +
         "JOIN Users ON Comments.userId = Users.userId WHERE CommentLikes.userId = ?" +
         page(page), [userId]);
+}
+
+function getRankedListQuery(listId) {
+    return mysql.format(rankedListAttributes +
+        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+        "WHERE RankedLists.listId = ?", [listId]);
+}
+
+function getRankItemsQuery(listId) {
+    return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY rank ASC", [listId]);
+}
+
+function getRankItemIds(listId) {
+    return mysql.format("SELECT itemId FROM RankItems WHERE listId = ? ORDER BY rank ASC", [listId]);
+}
+
+function updateRankedListQuery(rankedList, listId) {
+    return mysql.format("UPDATE RankedLIsts SET ? WHERE listId = ?", [rankedList, listId]);
+}
+
+function updateRankItemQuery(rankItem, itemId, listId) {
+    return mysql.format("UPDATE RankItems SET ? WHERE itemId = ? AND listId = ?", [rankItem, itemId, listId]);
+}
+
+function createRankItemQuery(rankItem) {
+    return mysql.format("INSERT INTO RankItems SET ?", [rankItem])
+}
+
+function deleteRankItemQuery(itemId, listId) {
+    return mysql.format("DELETE FROM RankItems WHERE itemId = ? AND listId = ?", [itemId, listId]);
+}
+
+function deleteRankedListQuery(listId, userId) {
+    return mysql.format("DELETE FROM RankedLists WHERE listId = ? AND userId = ?", [listId, userId]);
+}
+
+function createRankedListQuery(rankedList) {
+    return mysql.format("INSERT INTO RankedLists SET ?", [rankedList]);
+}
+
+function getUserRankedListsQuery(userId, sort, page) {
+    return mysql.format(rankedListAttributes +
+        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+        "WHERE RankedLists.private = false AND RankedLists.userId = ?" +
+        sortAndPage(sort, page), [userId]);
+}
+
+function getAllUserRankedListsQuery(userId, sort, page) {
+    return mysql.format(rankedListAttributes +
+        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+        "WHERE RankedLists.userId = ?" + sortAndPage(sort, page), [userId]);
+}
+
+function getFeedQuery(userId, lastDay) {
+    return mysql.format(rankedListAttributes +
+        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+        "WHERE RankedLists.userId = ? AND RankedLists.dateCreated >= ?", [userId, lastDay]);
+}
+
+function countSearchUsersQuery(query) {
+    return mysql.format("SELECT COUNT(Users.userId) FROM Users " +
+        "WHERE MATCH(Users.username, Users.bio) AGAINST(? IN NATURAL LANGUAGE MODE)", [query]);
+}
+
+function searchUsersQuery(query, sort, page) {
+    if (sort) {
+        return userPreviewAttributes +
+            mysql.format("FROM Users WHERE MATCH(Users.username, Users.bio) " +
+                "AGAINST(? IN NATURAL LANGUAGE MODE)" + sortAndPage(sort, page), [query]);
+    } else {
+        return userPreviewAttributes +
+            mysql.format("FROM Users WHERE MATCH(Users.username, Users.bio) " +
+                "AGAINST(? IN NATURAL LANGUAGE MODE)" + page(page), [query]);
+    }
+}
+
+function searchRankItemsQuery(query) {
+    return mysql.format("SELECT RankItems.listId AS lId FROM RankItems " +
+        "WHERE RankItems.private = false AND " +
+        "MATCH(RankItems.listTitle, RankItems.itemName, RankItems.description) " +
+        "AGAINST(? IN NATURAL LANGUAGE MODE)", [query]);
+}
+
+function countSearchListsQuery(query) {
+    return ("SELECT COUNT(RankedLists.listId) FROM (" + searchRankItemsQuery(query) +
+        ") AS search JOIN RankedLists ON search.lId = RankedLists.listId");
+}
+
+function searchListsQuery(query, sort, page) {
+    if (sort) {
+        return rankedListAttributes + "FROM (" + searchRankItemsQuery(query) +
+            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + sortAndPage(sort, page); 
+    } else {
+        return rankedListAttributes + "FROM (" + searchRankItemsQuery(query) +
+            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + page(page);
+    }
 }
