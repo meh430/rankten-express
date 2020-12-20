@@ -21,3 +21,5 @@ const queryValues = (connection, sqlQuery, values) => {
         })
     });
 }
+
+module.exports = { query, queryValues };
