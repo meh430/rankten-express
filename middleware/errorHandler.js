@@ -10,4 +10,8 @@ function invalidCredentialsError() {
     return new Error("invalid credentials");
 }
 
-module.exports = { authError, notFoundError, invalidCredentialsError };
+function badRequest() {
+    return new Error("bad request");
+}
+
+module.exports = { authError, notFoundError, invalidCredentialsError, badRequest };

@@ -160,6 +160,11 @@ function likeListQuery(userId, listId) {
     return mysql.format("INSERT INTO ListLikes SET userId = ?, listId = ?", [userId, listId]);
 }
 
+function getListLikersQuery(listId) {
+    return mysql.format(userPreviewAttributes + "FROM ListLikes JOIN Users ON " +
+        "ListLikes.userId = Users.userId WHERE ListLikes.userId = ?", [listId]);
+}
+
 function unlikeCommentQuery(userId, commentId) {
     return mysql.format("DELETE FROM CommentLikes WHERE userId = ? AND commentId = ?", [userId, commentId]);
 }
@@ -354,6 +359,7 @@ module.exports = {
     getFollowersQuery,
     unlikeListQuery,
     likeListQuery,
+    getListLikersQuery,
     unlikeCommentQuery,
     likeCommentQuery,
     getLikedListsQuery,

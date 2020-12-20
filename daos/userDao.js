@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const queries = require("../queries");
 const sql = require("../models/sqlPromise");
 const errors = require("../middleware/errorHandler");
+const utils = require("../utils");
 
 const namePattern = /^[a-z0-9_-]{3,15}$/g;
 const passwordPattern = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/g;
@@ -27,7 +28,7 @@ async function updateUser(connection, userId, user) {
     delete user.dateCreated;
     delete user.rankPoints;
 
-    if ('password' in user) {
+    if ("password" in user) {
         user.password = bcrypt.hashSync(user.password);
     }
 
@@ -47,7 +48,6 @@ async function deleteUser(connection, userId) {
         throw errors.notFoundError();
     }
 }
-
 
 async function getUser(connection, userId, private) {
     const userInfo = await sql.query(connection, queries.getUserQuery(userId));
@@ -90,5 +90,26 @@ async function follow(connection, userId, targetId) {
     }
 }
 
+async function getFollowing(connection, userId) {
+    const following = await sql.query(connection, queries.getFollowingQuery(userId));
+    console.log(following);
 
-module.exports = { createUser, updateUser, deleteUser, getUser };
+    return following;
+}
+
+async function getFollowers(connection, userId) {
+    const followers = await sql.query(connection, queries.getFollowersQuery(userId));
+    console.log(followers);
+
+    return followers;
+}
+
+async function getListLikers(connection, listId) {
+    const likers = await sql.query(connection, queries.getListLikersQuery(listId));
+    console.log(likers);
+
+    return likers;
+}
+
+
+module.exports = { createUser, updateUser, deleteUser, getUser, follow, getFollowing, getFollowers, getListLikers };
