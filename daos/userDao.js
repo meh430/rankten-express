@@ -48,6 +48,20 @@ async function deleteUser(connection, userId) {
     }
 }
 
-async function getUser(connection, user, private) {
-    return "TODO";
+
+async function getUser(connection, userId, private) {
+    const userInfo = await sql.query(connection, queries.getUserQuery(userId));
+    console.log(userInfo);
+
+    if (private) {
+        const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
+        const likedLists = await sql.query(connection, queries.getLikedListIdsQuery(userId));
+        const likedComments = await sql.query(connection, queries.getLikedCommentIdsQuery(userId));
+
+        console.log({ userInfo, following, likedLists, likedComments });
+
+        return { userInfo, following, likedLists, likedComments };
+    }
+
+    return userInfo;
 }
