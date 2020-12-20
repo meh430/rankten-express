@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require("mysql");
 
 // Whenever creating a row, make sure to add appropriate foreign keys
 
@@ -12,7 +12,7 @@ function deleteUserQuery(userId) {
 
 function updateUserQuery(userId, user) {
     return mysql.format("UPDATE Users SET ? WHERE userId = ?", [user, userId]);
-} 
+}
 
 function countUserListsQuery(userId) {
     return mysql.format("SELECT COUNT(RankedLists.listId) FROM RankedLists WHERE RankedLists.userId = ?", [userId]);
@@ -31,10 +31,18 @@ function countFollowingQuery(userId) {
 }
 
 function getUserQuery(userId) {
-    return mysql.format("SELECT Users.*, (" + countUserListsQuery(userId) +
-        ") AS numLists, (" + countUserCommentsQuery(userId) + ") AS numComments, (" + 
-        countFollowingQuery(userId) + ") AS numFollowing, (" + 
-        countFollowersQuery(userId) + ") AS numFollowers FROM Users WHERE Users.userId = ?", [userId]);
+    return mysql.format(
+        "SELECT Users.*, (" +
+            countUserListsQuery(userId) +
+            ") AS numLists, (" +
+            countUserCommentsQuery(userId) +
+            ") AS numComments, (" +
+            countFollowingQuery(userId) +
+            ") AS numFollowing, (" +
+            countFollowersQuery(userId) +
+            ") AS numFollowers FROM Users WHERE Users.userId = ?",
+        [userId]
+    );
 }
 
 function getFollowingIdsQuery(userId) {
@@ -58,15 +66,19 @@ function createCommentQuery(comment) {
 }
 
 function updateCommentQuery(commentId, userId, comment) {
-    return mysql.format("UPDATE Comments SET comment = ? WHERE userId = ? AND commentId = ?",
-        [comment, userId, commentId]);
+    return mysql.format("UPDATE Comments SET comment = ? WHERE userId = ? AND commentId = ?", [
+        comment,
+        userId,
+        commentId,
+    ]);
 }
 
 function deleteCommentQuery(commentId, userId) {
     return mysql.format("DELETE FROM Comments WHERE commentId = ? AND userId = ?", [commentId, userId]);
 }
 
-const commentAttributes = "SELECT Comments.*, Users.username, Users.profilePic, " +
+const commentAttributes =
+    "SELECT Comments.*, Users.username, Users.profilePic, " +
     "(SELECT COUNT(CommentLikes.userId) FROM CommentLikes WHERE" +
     "CommentLikes.commentId = Comments.commentId) AS numLikes ";
 
@@ -79,51 +91,65 @@ function sortAndPage(page, sort) {
 }
 
 function getListCommentsQuery(listId, page, sort) {
-    return mysql.format(commentAttributes +
-        "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
-        "WHERE Comments.listId = ?" + sortAndPage(page, sort), [listId]);
+    return mysql.format(
+        commentAttributes +
+            "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
+            "WHERE Comments.listId = ?" +
+            sortAndPage(page, sort),
+        [listId]
+    );
 }
 
 function getUserCommentsQuery(userId, page, sort) {
-    return mysql.format(commentAttributes +
-        "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
-        "WHERE Comments.userId = ?" + sortAndPage(page, sort), [userId]);
+    return mysql.format(
+        commentAttributes +
+            "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
+            "WHERE Comments.userId = ?" +
+            sortAndPage(page, sort),
+        [userId]
+    );
 }
 
 function getRankItemsPreviewQuery(listId) {
     return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY rank ASC LIMIT 3", [listId]);
 }
 
-const rankedListAttributes = "SELECT RankedLists.*, Users.username, Users.profilePic, " +
+const rankedListAttributes =
+    "SELECT RankedLists.*, Users.username, Users.profilePic, " +
     "(SELECT COUNT(ListLikes.userId) FROM ListLikes WHERE ListLikes.listId = RankedLists.listId) AS numLikes, " +
     "(SELECT COUNT(Comments.commentId) FROM Comments WHERE Comments.listId = RankedLists.listId) AS numComments ";
 
 function getDiscoverQuery(page, sort) {
-    return rankedListAttributes +
+    return (
+        rankedListAttributes +
         "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.private = false" + sortAndPage(page, sort);
+        "WHERE RankedLists.private = false" +
+        sortAndPage(page, sort)
+    );
 }
 
 function unfollowQuery(userId, targetId) {
-    return mysql.format("DELETE FROM Follows WHERE userId = ? AND followsId = ?",
-        [userId, targetId]);
+    return mysql.format("DELETE FROM Follows WHERE userId = ? AND followsId = ?", [userId, targetId]);
 }
 
 function followQuery(userId, targetId) {
     return mysql.format("INSERT INTO Follows SET userId = ?, followsId = ?", [userId, targetId]);
 }
 
-const userPreviewAttributes =
-    "SELECT Users.userId, Users.username, Users.profilePic, Users.bio, Users.rankPoints ";
+const userPreviewAttributes = "SELECT Users.userId, Users.username, Users.profilePic, Users.bio, Users.rankPoints ";
 
 function getFollowingQuery(userId) {
-    return mysql.format(userPreviewAttributes +
-        "FROM Follows JOIN Users ON Follows.followsId = Users.userId WHERE Follows.userId = ?", [userId]);
+    return mysql.format(
+        userPreviewAttributes + "FROM Follows JOIN Users ON Follows.followsId = Users.userId WHERE Follows.userId = ?",
+        [userId]
+    );
 }
 
 function getFollowersQuery(userId) {
-    return mysql.format(userPreviewAttributes +
-        "FROM Follows JOIN Users ON Follows.userId = Users.userId WHERE Follows.followsId = ?", [userId]);
+    return mysql.format(
+        userPreviewAttributes + "FROM Follows JOIN Users ON Follows.userId = Users.userId WHERE Follows.followsId = ?",
+        [userId]
+    );
 }
 
 function unlikeListQuery(userId, listId) {
@@ -143,23 +169,32 @@ function likeCommentQuery(userId, commentId) {
 }
 
 function getLikedListsQuery(userId, page) {
-    return mysql.format(rankedListAttributes +
-        "FROM ListLikes JOIN RankedLists ON ListLikes.listId = RankedLists.listId " +
-        "JOIN Users ON RankedLists.userId = Users.userId WHERE ListLikes.userId = ?" +
-        page(page), [userId]);
+    return mysql.format(
+        rankedListAttributes +
+            "FROM ListLikes JOIN RankedLists ON ListLikes.listId = RankedLists.listId " +
+            "JOIN Users ON RankedLists.userId = Users.userId WHERE ListLikes.userId = ?" +
+            page(page),
+        [userId]
+    );
 }
 
 function getLikedCommentsQuery(userId, page) {
-    return mysql.format(commentAttributes +
-        "FROM CommentLikes JOIN Comments ON CommentLikes.commentId = Comments.commentId " +
-        "JOIN Users ON Comments.userId = Users.userId WHERE CommentLikes.userId = ?" +
-        page(page), [userId]);
+    return mysql.format(
+        commentAttributes +
+            "FROM CommentLikes JOIN Comments ON CommentLikes.commentId = Comments.commentId " +
+            "JOIN Users ON Comments.userId = Users.userId WHERE CommentLikes.userId = ?" +
+            page(page),
+        [userId]
+    );
 }
 
 function getRankedListQuery(listId) {
-    return mysql.format(rankedListAttributes +
-        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.listId = ?", [listId]);
+    return mysql.format(
+        rankedListAttributes +
+            "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+            "WHERE RankedLists.listId = ?",
+        [listId]
+    );
 }
 
 function getRankItemsQuery(listId) {
@@ -179,7 +214,7 @@ function updateRankItemQuery(rankItem, itemId, listId) {
 }
 
 function createRankItemQuery(rankItem) {
-    return mysql.format("INSERT INTO RankItems SET ?", [rankItem])
+    return mysql.format("INSERT INTO RankItems SET ?", [rankItem]);
 }
 
 function deleteRankItemQuery(itemId, listId) {
@@ -195,59 +230,149 @@ function createRankedListQuery(rankedList) {
 }
 
 function getUserRankedListsQuery(userId, page, sort) {
-    return mysql.format(rankedListAttributes +
-        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.private = false AND RankedLists.userId = ?" +
-        sortAndPage(page, sort), [userId]);
+    return mysql.format(
+        rankedListAttributes +
+            "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+            "WHERE RankedLists.private = false AND RankedLists.userId = ?" +
+            sortAndPage(page, sort),
+        [userId]
+    );
 }
 
 function getAllUserRankedListsQuery(userId, page, sort) {
-    return mysql.format(rankedListAttributes +
-        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.userId = ?" + sortAndPage(page, sort), [userId]);
+    return mysql.format(
+        rankedListAttributes +
+            "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+            "WHERE RankedLists.userId = ?" +
+            sortAndPage(page, sort),
+        [userId]
+    );
 }
 
 function getFeedQuery(userId, lastDay) {
-    return mysql.format(rankedListAttributes +
-        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
-        "WHERE RankedLists.userId = ? AND RankedLists.dateCreated >= ?", [userId, lastDay]);
+    return mysql.format(
+        rankedListAttributes +
+            "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+            "WHERE RankedLists.userId = ? AND RankedLists.dateCreated >= ?",
+        [userId, lastDay]
+    );
 }
 
 function countSearchUsersQuery(query) {
-    return mysql.format("SELECT COUNT(Users.userId) FROM Users " +
-        "WHERE MATCH(Users.username, Users.bio) AGAINST(? IN NATURAL LANGUAGE MODE)", [query]);
+    return mysql.format(
+        "SELECT COUNT(Users.userId) FROM Users " +
+            "WHERE MATCH(Users.username, Users.bio) AGAINST(? IN NATURAL LANGUAGE MODE)",
+        [query]
+    );
 }
 
 function searchUsersQuery(query, page, sort) {
     if (sort) {
-        return userPreviewAttributes +
-            mysql.format("FROM Users WHERE MATCH(Users.username, Users.bio) " +
-                "AGAINST(? IN NATURAL LANGUAGE MODE)" + sortAndPage(page, sort), [query]);
+        return (
+            userPreviewAttributes +
+            mysql.format(
+                "FROM Users WHERE MATCH(Users.username, Users.bio) " +
+                    "AGAINST(? IN NATURAL LANGUAGE MODE)" +
+                    sortAndPage(page, sort),
+                [query]
+            )
+        );
     } else {
-        return userPreviewAttributes +
-            mysql.format("FROM Users WHERE MATCH(Users.username, Users.bio) " +
-                "AGAINST(? IN NATURAL LANGUAGE MODE)" + page(page), [query]);
+        return (
+            userPreviewAttributes +
+            mysql.format(
+                "FROM Users WHERE MATCH(Users.username, Users.bio) " +
+                    "AGAINST(? IN NATURAL LANGUAGE MODE)" +
+                    page(page),
+                [query]
+            )
+        );
     }
 }
 
 function searchRankItemsQuery(query) {
-    return mysql.format("SELECT RankItems.listId AS lId FROM RankItems " +
-        "WHERE RankItems.private = false AND " +
-        "MATCH(RankItems.listTitle, RankItems.itemName, RankItems.description) " +
-        "AGAINST(? IN NATURAL LANGUAGE MODE)", [query]);
+    return mysql.format(
+        "SELECT RankItems.listId AS lId FROM RankItems " +
+            "WHERE RankItems.private = false AND " +
+            "MATCH(RankItems.listTitle, RankItems.itemName, RankItems.description) " +
+            "AGAINST(? IN NATURAL LANGUAGE MODE)",
+        [query]
+    );
 }
 
 function countSearchListsQuery(query) {
-    return ("SELECT COUNT(RankedLists.listId) FROM (" + searchRankItemsQuery(query) +
-        ") AS search JOIN RankedLists ON search.lId = RankedLists.listId");
+    return (
+        "SELECT COUNT(RankedLists.listId) FROM (" +
+        searchRankItemsQuery(query) +
+        ") AS search JOIN RankedLists ON search.lId = RankedLists.listId"
+    );
 }
 
 function searchListsQuery(query, page, sort) {
     if (sort) {
-        return rankedListAttributes + "FROM (" + searchRankItemsQuery(query) +
-            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + sortAndPage(page, sort); 
+        return (
+            rankedListAttributes +
+            "FROM (" +
+            searchRankItemsQuery(query) +
+            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" +
+            sortAndPage(page, sort)
+        );
     } else {
-        return rankedListAttributes + "FROM (" + searchRankItemsQuery(query) +
-            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" + page(page);
+        return (
+            rankedListAttributes +
+            "FROM (" +
+            searchRankItemsQuery(query) +
+            ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" +
+            page(page)
+        );
     }
 }
+
+module.exports = {
+    createUserQuery,
+    deleteUserQuery,
+    updateUserQuery,
+    countUserListsQuery,
+    countUserCommentsQuery,
+    countFollowersQuery,
+    countFollowingQuery,
+    getUserQuery,
+    getFollowingIdsQuery,
+    getFollowerIdsQuery,
+    getLikedListIdsQuery,
+    getLikedCommentIdsQuery,
+    createCommentQuery,
+    updateCommentQuery,
+    deleteCommentQuery,
+    getListCommentsQuery,
+    getUserCommentsQuery,
+    getRankItemsPreviewQuery,
+    getDiscoverQuery,
+    unfollowQuery,
+    followQuery,
+    getFollowingQuery,
+    getFollowersQuery,
+    unlikeListQuery,
+    likeListQuery,
+    unlikeCommentQuery,
+    likeCommentQuery,
+    getLikedListsQuery,
+    getLikedCommentsQuery,
+    getRankedListQuery,
+    getRankItemsQuery,
+    getRankItemIds,
+    updateRankedListQuery,
+    updateRankItemQuery,
+    createRankItemQuery,
+    deleteRankItemQuery,
+    deleteRankedListQuery,
+    createRankedListQuery,
+    getUserRankedListsQuery,
+    getAllUserRankedListsQuery,
+    getFeedQuery,
+    countSearchUsersQuery,
+    searchUsersQuery,
+    searchRankItemsQuery,
+    countSearchListsQuery,
+    searchListsQuery,
+};
