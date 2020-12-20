@@ -14,4 +14,8 @@ function badRequest() {
     return new Error("bad request");
 }
 
-module.exports = { authError, notFoundError, invalidCredentialsError, badRequest };
+function invalidPage() {
+    return new Error("invalid page");
+}
+
+module.exports = { authError, notFoundError, invalidCredentialsError, badRequest, invalidPage };

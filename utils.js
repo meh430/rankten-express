@@ -26,4 +26,12 @@ function getSort(sort, user = false) {
     }
 }
 
-module.exports = { limitAndOffset, getSort };
+function validatePage(results) {
+    if (!results) {
+        throw errors.invalidPage();
+    }
+
+    return results;
+}
+
+module.exports = { limitAndOffset, getSort, validatePage };
