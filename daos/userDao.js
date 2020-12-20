@@ -65,3 +65,5 @@ async function getUser(connection, userId, private) {
 
     return userInfo;
 }
+
+module.exports = { createUser, updateUser, deleteUser, getUser };
