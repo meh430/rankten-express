@@ -30,8 +30,13 @@ async function updateUser(connection, userId, user) {
     delete user.userId;
     delete user.dateCreated;
     delete user.rankPoints;
+    delete user.username;
 
     if ("password" in user) {
+        if (!user.password.match(passwordPattern)) {
+            throw errors.invalidCredentialsError();    
+        }
+
         user.password = bcrypt.hashSync(user.password);
     }
 

@@ -4,7 +4,7 @@ const createUsersTable =
     "CREATE TABLE IF NOT EXISTS Users(" +
     "userId int NOT NULL PRIMARY KEY AUTO_INCREMENT," +
     "dateCreated bigint NOT NULL," +
-    "username varchar(15) NOT NULL," +
+    "username varchar(15) UNIQUE NOT NULL," +
     "password varchar(100) NOT NULL," +
     "bio TEXT," +
     "profilePic TEXT," +
