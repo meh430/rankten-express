@@ -66,6 +66,11 @@ async function getUser(connection, userId, private) {
 }
 
 async function follow(connection, userId, targetId) {
+    if (userId === targetId) {
+        throw errors.badRequest();
+    }
+
+
     const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
 
     if (following.includes(targetId)) {
@@ -99,6 +104,10 @@ async function getFollowers(connection, userId) {
     return followers;
 }
 
+async function likeUnlike(connection, userId, targetId, query) {
+    await sql.query(connection, query(userId, targetId));
+}
+
 async function getListLikers(connection, listId) {
     const likers = await sql.query(connection, queries.getListLikersQuery(listId));
     console.log(likers);
@@ -124,6 +133,7 @@ module.exports = {
     follow,
     getFollowing,
     getFollowers,
+    likeUnlike,
     getListLikers,
     searchUsers,
 };
