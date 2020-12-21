@@ -1,7 +1,60 @@
 const queries = require("../queries");
 const sql = require("../models/sqlPromise");
 const rankItemDao = require("./rankItemDao");
+const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
+
+async function createRankedList() {
+
+}
+
+async function updateRankedList(connection, listId, userId, rankedList) {
+    const rankItems = rankedList.rankItems;
+
+    if (rankItems.length < 1 || rankItems.length > 10) {
+        throw errors.badRequest();
+    }  
+
+    delete rankedList.listId;
+    delete rankedList.userId;
+    delete rankedList.dateCreated;
+    delete rankedList.rankItems;
+
+    const listRes = await sql.query(connection, queries.updateRankedListQuery(rankedList, listId, userId));
+    utils.checkRow(listRes);
+
+    const currentItemIds = await rankItemDao.getListRankItemIds(connection, listId);
+    console.log(currentItemIds);
+
+    const givenItemIds = utils.getOnePropArray(rankItems, 'itemId');
+
+    currentItemIds.forEach(id => {
+        if (!givenItemIds.includes(id)) {
+            await rankItemDao.deleteRankItem(connection, id);
+        }
+    });
+
+    rankItems.forEach(rankItem => {
+        if ('itemId' in rankItem) {
+            if (currentItemIds.includes(rankItem.itemId)) {
+                await rankItemDao.updateRankItem(connection, rankItem.itemId, rankItem, rankedList.title, rankedList.private);
+            } else {
+                throw errors.badRequest();
+            }
+        } else {
+            await rankItemDao.createRankItem(connection, rankItem, listId, rankedList.title, rankedList.private);
+        }
+    });
+}    
+
+async function getRankedList(connection, listId) {
+    const rankedList = await sql.query(connection, queries.getRankedListQuery(listId));
+    const rankItems = await sql.query(connection, queries.getRankItemsQuery(listId));
+
+    rankedList.rankItems = rankItems;
+
+    return rankedList;
+}
 
 async function getPictureAndThree(connection, listId) {
     const rankItems = await rankItemDao.getListRankItems(connection, listId);

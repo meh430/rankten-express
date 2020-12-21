@@ -210,8 +210,8 @@ function getRankItemIds(listId) {
     return mysql.format("SELECT itemId FROM RankItems WHERE listId = ? ORDER BY rank ASC", [listId]);
 }
 
-function updateRankedListQuery(rankedList, listId) {
-    return mysql.format("UPDATE RankedLIsts SET ? WHERE listId = ?", [rankedList, listId]);
+function updateRankedListQuery(rankedList, listId, userId) {
+    return mysql.format("UPDATE RankedLIsts SET ? WHERE listId = ? AND userId = ?", [rankedList, listId, userId]);
 }
 
 function updateRankItemQuery(rankItem, itemId, listId) {

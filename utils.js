@@ -40,4 +40,8 @@ function checkRow(result) {
     }
 }
 
-module.exports = { limitAndOffset, getSort, validatePage, checkRow };
+function getOnePropArray(objects, property) {
+    return objects.map(obj => obj[property]).filter(val => val !== undefined);
+}
+
+module.exports = { limitAndOffset, getSort, validatePage, checkRow, getOnePropArray };
