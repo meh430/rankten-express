@@ -77,8 +77,14 @@ async function getUser(userId, private) {
     return userInfo;
 }
 
-async function userExists(username) {
-    return (await sql.poolQuery(queries.getUserWithNameQuery(username))).length > 0;
+async function getUserWithName(username) {
+    const user = await sql.poolQuery(queries.getUserWithNameQuery(username));
+
+    if (user.length) {
+        return user[0];
+    } 
+
+    return false;
 }
 
 async function follow(userId, targetId) {
@@ -144,7 +150,7 @@ module.exports = {
     updateUser,
     deleteUser,
     getUser,
-    userExists,
+    getUserWithName,
     follow,
     getFollowing,
     getFollowers,
