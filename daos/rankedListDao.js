@@ -94,7 +94,10 @@ async function deleteRankedList(connection, listId, userId) {
 }
 
 async function getRankedList(connection, listId) {
-    const rankedList = await sql.query(connection, queries.getRankedListQuery(listId));
+    let rankedList = await sql.query(connection, queries.getRankedListQuery(listId));
+    utils.checkIfFound(rankedList);
+    rankedList = rankedList[0];
+
     const rankItems = await sql.query(connection, queries.getRankItemsQuery(listId));
 
     rankedList.rankItems = rankItems;
@@ -159,7 +162,7 @@ async function getDiscoverLists(connection, page, sort) {
 
     const discoverPreviews = await getRankedListPreviews(connection, discoverLists);
     console.log(discoverPreviews);
-    return discoverPreviews;
+    return utils.validatePage(discoverPreviews);
 }
 
 async function getLikedLists(connection, userId, page) {
@@ -172,12 +175,12 @@ async function getLikedLists(connection, userId, page) {
 async function getUserLists(connection, userId, page, sort, all = false) {
     page = utils.limitAndOffset(page);
     sort = utils.getSort(sort);
-    return await getRankedListPreviews(
+    return utils.validatePage(await getRankedListPreviews(
         connection,
         all
             ? await sql.query(connection, queries.getAllUserRankedListsQuery(userId, page, sort))
             : await sql.query(connection, queries.getUserRankedListsQuery(userId, page, sort))
-    );
+    ));
 }
 
 async function getFeed(connection, userId) {
@@ -191,7 +194,7 @@ async function getFeed(connection, userId) {
         );
     });
 
-    return feedList;
+    return utils.validatePage(feedList);
 }
 
 async function searchLists(connection, query, page, sort) {

@@ -111,7 +111,7 @@ function getUserCommentsQuery(userId, page, sort) {
 }
 
 function getRankItemsPreviewQuery(listId) {
-    return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY rank ASC LIMIT 3", [listId]);
+    return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY ranking ASC LIMIT 3", [listId]);
 }
 
 const rankedListAttributes =
@@ -134,6 +134,10 @@ function unfollowQuery(userId, targetId) {
 
 function followQuery(userId, targetId) {
     return mysql.format("INSERT INTO Follows SET userId = ?, followsId = ?", [userId, targetId]);
+}
+
+function deleteFromFollowersQuery(userId) {
+    return mysql.format("DELETE FROM Follows WHERE followsId = ?", [userId]);
 }
 
 const userPreviewAttributes = "SELECT Users.userId, Users.username, Users.profilePic, Users.bio, Users.rankPoints ";
@@ -207,11 +211,11 @@ function getRankedListQuery(listId) {
 }
 
 function getRankItemsQuery(listId) {
-    return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY rank ASC", [listId]);
+    return mysql.format("SELECT * FROM RankItems WHERE listId = ? ORDER BY ranking ASC", [listId]);
 }
 
 function getRankItemIds(listId) {
-    return mysql.format("SELECT itemId FROM RankItems WHERE listId = ? ORDER BY rank ASC", [listId]);
+    return mysql.format("SELECT itemId FROM RankItems WHERE listId = ? ORDER BY ranking ASC", [listId]);
 }
 
 function updateRankedListQuery(rankedList, listId, userId) {
@@ -372,6 +376,7 @@ module.exports = {
     getDiscoverQuery,
     unfollowQuery,
     followQuery,
+    deleteFromFollowersQuery,
     getFollowingQuery,
     getFollowersQuery,
     unlikeListQuery,

@@ -18,7 +18,7 @@ const createRankedListsTable =
     "dateCreated bigint NOT NULL," +
     "title varchar(50) NOT NULL," +
     "private bool DEFAULT false," +
-    "FOREIGN KEY (userId) REFERENCES User(userId) ON DELETE CASCADE," +
+    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
     "FULLTEXT KEY (title))";
 
 const createRankItemsTable =
@@ -27,7 +27,7 @@ const createRankItemsTable =
     "listId int NOT NULL," +
     "listTitle varchar(50) NOT NULL," +
     "private bool DEFAULT false," +
-    "rank int NOT NULL," +
+    "ranking int NOT NULL," +
     "itemName varchar(50) NOT NULL," +
     "description TEXT," +
     "picture TEXT," +
@@ -41,7 +41,7 @@ const commentsTable =
     "listId int NOT NULL," +
     "dateCreated bigint NOT NULL," +
     "comment TEXT NOT NULL," +
-    "FOREIGN KEY (userId) REFERENCES User(userId) ON DELETE CASCADE," +
+    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
     "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE)";
 
 const createListLikesTable =
@@ -56,14 +56,13 @@ const createCommentLikesTable =
     "userId int NOT NULL," +
     "likedCommentId int NOT NULL," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FOREIGN KEY (likedCommentId) REFERENCES Comments(likedCommentId) ON DELETE CASCADE)";
+    "FOREIGN KEY (likedCommentId) REFERENCES Comments(commentId) ON DELETE CASCADE)";
 
 const createFollowsTable =
     "CREATE TABLE IF NOT EXISTS Follows(" +
     "userId int NOT NULL," +
     "followsId int NOT NULL," +
-    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE" +
-    "FOREIGN KEY (followsId) REFERENCES Users(userId) ON DELETE CASCADE)";
+    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE)";
 
 async function initializeTables(connection) {
     await sql.query(connection, createUsersTable);

@@ -46,11 +46,16 @@ async function deleteUser(connection, userId) {
     console.log(res);
 
     utils.checkRow(res);
+
+    await sql.query(connection, queries.deleteFromFollowersQuery(userId));
 }
 
 async function getUser(connection, userId, private) {
-    const userInfo = await sql.query(connection, queries.getUserQuery(userId));
+    let userInfo = await sql.query(connection, queries.getUserQuery(userId));
     console.log(userInfo);
+
+    utils.checkIfFound(userInfo);
+    userInfo = userInfo[0];
 
     if (private) {
         const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
@@ -58,7 +63,6 @@ async function getUser(connection, userId, private) {
         const likedComments = await sql.query(connection, queries.getLikedCommentIdsQuery(userId));
 
         console.log({ userInfo, following, likedLists, likedComments });
-
         return { userInfo, following, likedLists, likedComments };
     }
 

@@ -40,6 +40,12 @@ function checkRow(result) {
     }
 }
 
+function checkIfFound(result) {
+    if (!results.length) {
+        throw errors.notFoundError();
+    }
+}
+
 function getOnePropArray(objects, property) {
     return objects.map((obj) => obj[property]).filter((val) => val !== undefined);
 }
@@ -50,4 +56,4 @@ async function asyncForEach(arr, callback) {
     }
 }
 
-module.exports = { limitAndOffset, getSort, validatePage, checkRow, getOnePropArray, asyncForEach };
+module.exports = { limitAndOffset, getSort, validatePage, checkRow, checkIfFound, getOnePropArray, asyncForEach };

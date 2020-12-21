@@ -1,6 +1,6 @@
 const util = require("util");
 
-const query = (connection, sqlQuery) => {
+const query = async(connection, sqlQuery) => {
     return new Promise((resolve, reject) => {
         connection.query(sqlQuery, (err, results, fields) => {
             if (err) {
@@ -12,7 +12,7 @@ const query = (connection, sqlQuery) => {
     });
 };
 
-const queryValues = (connection, sqlQuery, values) => {
+const queryValues = async(connection, sqlQuery, values) => {
     return new Promise((resolve, reject) => {
         connection.query(sqlQuery, values, (err, results, fields) => {
             if (err) {
@@ -24,7 +24,7 @@ const queryValues = (connection, sqlQuery, values) => {
     });
 };
 
-const connect = (connection) => {
+const connect = async(connection) => {
     return new Promise((resolve, reject) => {
         connection.connect((err) => {
             if (err) {
@@ -36,15 +36,15 @@ const connect = (connection) => {
     });
 };
 
-const transaction = (connection) => {
+const transaction = async(connection) => {
     return {
-        beginTransaction() {
+        async beginTransaction() {
             return util.promisify(connection.beginTransaction).call(connection);
         },
-        commit() {
+        async commit() {
             return util.promisify(connection.commit).call(connection);
         },
-        rollback() {
+        async rollback() {
             return util.promisify(connection.rollback).call(connection);
         },
     };
