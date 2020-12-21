@@ -9,6 +9,8 @@ const models = require("./models");
 const app = express();
 const port = 3000;
 
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(cors());
 
 var connection;
@@ -34,7 +36,7 @@ async function init() {
         console.log(await sql.query(connection, "SHOW TABLES"));
 
         app.get("/", (req, res) => {
-            res.send("Hello World!");
+            res.status(200).send("Hello World!");
         });
     } catch (error) {
         console.log(error);
