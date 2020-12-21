@@ -1,4 +1,31 @@
 const util = require("util");
+const pool = require("./pool");
+
+// for queries that need to share the connection. Transactions?
+// use pool.query() for other queries where parallel is ok
+const getConnection = async () => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((error, connection) => {
+            if (error) {
+                reject(error);
+            }
+
+            resolve(connection);
+        })
+    })
+}
+
+const poolQuery = async (sqlQuery) => {
+    return new Promise((resolve, reject) => {
+        pool.query(sqlQuery, (err, results, fields) => {
+            if (err) {
+                reject(err);
+            }
+
+            resolve(results);
+        });
+    });
+}
 
 const query = async(connection, sqlQuery) => {
     return new Promise((resolve, reject) => {
@@ -50,4 +77,4 @@ const transaction = async(connection) => {
     };
 };
 
-module.exports = { query, queryValues, connect, transaction };
+module.exports = { poolQuery, query, queryValues, connect, transaction, getConnection };

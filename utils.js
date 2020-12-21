@@ -10,7 +10,7 @@ const sortOptions = {
 const [likes, newest, oldest] = [0, 1, 2];
 
 function limitAndOffset(page, numItems = 10) {
-    return [10, page * numItems];
+    return [numItems, page * numItems];
 }
 
 function getSort(sort, user = false) {

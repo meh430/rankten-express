@@ -4,7 +4,8 @@ const rankItemDao = require("./rankItemDao");
 const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
-async function createRankedList(connection, userId, rankedList) {
+async function createRankedList(userId, rankedList) {
+    const connection = await sql.getConnection();
     const transaction = sql.transaction(connection);
 
     const rankItems = rankedList.rankItems;
@@ -30,10 +31,13 @@ async function createRankedList(connection, userId, rankedList) {
     } catch (error) {
         await transaction.rollback();
         throw error;
+    } finally {
+        connection.release();
     }
 }
 
-async function updateRankedList(connection, listId, userId, rankedList) {
+async function updateRankedList(listId, userId, rankedList) {
+    const connection = await sql.getConnection();
     const transaction = sql.transaction(connection);
 
     const rankItems = rankedList.rankItems;
@@ -86,27 +90,31 @@ async function updateRankedList(connection, listId, userId, rankedList) {
     } catch (error) {
         await transaction.rollback();
         throw error;
+    } finally {
+        connection.release();
     }
 }
 
-async function deleteRankedList(connection, listId, userId) {
-    await sql.query(connection, queries.deleteRankedListQuery(listId, userId));
+async function deleteRankedList(listId, userId) {
+    await sql.poolQuery(queries.deleteRankedListQuery(listId, userId));
 }
 
-async function getRankedList(connection, listId) {
-    let rankedList = await sql.query(connection, queries.getRankedListQuery(listId));
+async function getRankedList(listId) {
+    const [rankedList, rankItems] = await Promise.all([
+        sql.poolQuery(queries.getRankedListQuery(listId), sql.poolQuery(queries.getRankItemsQuery(listId))),
+    ]);
+
     utils.checkIfFound(rankedList);
-    rankedList = rankedList[0];
 
-    const rankItems = await sql.query(connection, queries.getRankItemsQuery(listId));
-
-    rankedList.rankItems = rankItems;
-
-    return rankedList;
+    rankedList[0].rankItems = rankItems;
+    return rankedList[0];
 }
 
-async function getPictureAndThree(connection, listId) {
-    const rankItems = await rankItemDao.getListRankItems(connection, listId);
+async function getPreviewItem(rankedList) {
+    const listId = rankedList.listId;
+    const currentPreview = { ...rankedList };
+
+    const rankItems = await rankItemDao.getListRankItems(listId);
 
     const items = [];
     let picture = "";
@@ -123,85 +131,73 @@ async function getPictureAndThree(connection, listId) {
         }
     }
 
-    return [items, numItems, picture];
-}
+    currentPreview.rankItems = items;
+    currentPreview.numItems = numItems;
+    currentPreview.picture = picture;
 
-async function getRankedListPreviews(connection, rankedLists) {
-    const previews = [];
-
-    for (let i = 0; i < rankedLists.length; i++) {
-        const currentPreview = { ...rankedLists[i] };
-        const [rankItems, numItems, picture] = getPictureAndThree(connection, rankedLists[i].listId);
-        currentPreview.rankItems = rankItems;
-        currentPreview.numItems = numItems;
-        currentPreview.picture = picture;
-
-        const commentPreview = await sql.query(connection, queries.getCommentPreview(rankedLists[i].listId));
-        console.log(commentPreview);
-        if (commentPreview) {
-            currentPreview.commentPreview = {
-                comment: commentPreview[0].comment,
-                profilePic: commentPreview[0].profilePic,
-                username: commentPreview[0].username,
-                dateCreated: commentPreview[0].dateCreated,
-            };
-        }
-
-        previews.push(currentPreview);
+    const commentPreview = await sql.poolQuery(queries.getCommentPreview(listId));
+    if (commentPreview.length) {
+        currentPreview.commentPreview = {
+            comment: commentPreview[0].comment,
+            profilePic: commentPreview[0].profilePic,
+            username: commentPreview[0].username,
+            dateCreated: commentPreview[0].dateCreated,
+        };
     }
-
-    return previews;
+    return currentPreview;
 }
 
-async function getDiscoverLists(connection, page, sort) {
-    const discoverLists = await sql.query(
-        connection,
+async function getRankedListPreviews(rankedLists) {
+    return await Promise.all(rankedLists.map((rankedList) => getPreviewItem(rankedList)));
+}
+
+async function getDiscoverLists(page, sort) {
+    const discoverLists = await sql.poolQuery(
         queries.getDiscoverQuery(utils.limitAndOffset(page), utils.getSort(sort))
     );
     console.log(discoverLists);
 
-    const discoverPreviews = await getRankedListPreviews(connection, discoverLists);
+    const discoverPreviews = await getRankedListPreviews(discoverLists);
     console.log(discoverPreviews);
     return utils.validatePage(discoverPreviews);
 }
 
-async function getLikedLists(connection, userId, page) {
-    return utils.validatePage(await getRankedListPreviews(
-        connection,
-        await sql.query(connection, queries.getLikedListsQuery(userId, utils.limitAndOffset(page)))
-    ));
+async function getLikedLists(userId, page) {
+    return utils.validatePage(
+        await getRankedListPreviews(await sql.poolQuery(queries.getLikedListsQuery(userId, utils.limitAndOffset(page))))
+    );
 }
 
-async function getUserLists(connection, userId, page, sort, all = false) {
+async function getUserLists(userId, page, sort, all = false) {
     page = utils.limitAndOffset(page);
     sort = utils.getSort(sort);
-    return utils.validatePage(await getRankedListPreviews(
-        connection,
-        all
-            ? await sql.query(connection, queries.getAllUserRankedListsQuery(userId, page, sort))
-            : await sql.query(connection, queries.getUserRankedListsQuery(userId, page, sort))
-    ));
+    return utils.validatePage(
+        await getRankedListPreviews(
+            all
+                ? await sql.poolQuery(queries.getAllUserRankedListsQuery(userId, page, sort))
+                : await sql.poolQuery(queries.getUserRankedListsQuery(userId, page, sort))
+        )
+    );
 }
 
-async function getFeed(connection, userId) {
+async function getFeed(userId) {
     const lastDay = Date.now() - 24 * 60 * 60 * 1000;
     const feedList = [];
-    const followingIds = await sql.query(connection, queries.getFollowingIdsQuery(userId));
+    const followingIds = await sql.poolQuery.query(queries.getFollowingIdsQuery(userId));
 
     await utils.asyncForEach(followingIds, async (id) => {
-        feedList.push(
-            await getRankedListPreviews(connection, await sql.query(connection, queries.getFeedQuery(id, lastDay)))
-        );
+        feedList.push(await getRankedListPreviews(await sql.poolQuery(queries.getFeedQuery(id, lastDay))));
     });
 
     return utils.validatePage(feedList);
 }
 
-async function searchLists(connection, query, page, sort) {
-    return utils.validatePage(await getRankedListPreviews(
-        connection,
-        await sql.query(connection, queries.searchListsQuery(query, utils.limitAndOffset(page), utils.getSort(sort)))
-    ));
+async function searchLists(query, page, sort) {
+    return utils.validatePage(
+        await getRankedListPreviews(
+            await sql.poolQuery(queries.searchListsQuery(query, utils.limitAndOffset(page), utils.getSort(sort)))
+        )
+    );
 }
 
 module.exports = {

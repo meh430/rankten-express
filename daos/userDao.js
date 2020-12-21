@@ -9,7 +9,7 @@ const passwordPattern = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-
 
 // TODO: do not found checks in getters
 
-async function createUser(connection, user) {
+async function createUser(user) {
     delete user.userId;
     delete user.rankPoints;
 
@@ -21,7 +21,7 @@ async function createUser(connection, user) {
 
     user.password = bcrypt.hashSync(user.password);
 
-    const res = await sql.query(connection, queries.createUserQuery(user));
+    const res = await sql.poolQuery(queries.createUserQuery(user));
     console.log(res);
     return res.insertId;
 }
@@ -34,7 +34,7 @@ async function updateUser(connection, userId, user) {
 
     if ("password" in user) {
         if (!user.password.match(passwordPattern)) {
-            throw errors.invalidCredentialsError();    
+            throw errors.invalidCredentialsError();
         }
 
         user.password = bcrypt.hashSync(user.password);
@@ -55,34 +55,34 @@ async function deleteUser(connection, userId) {
     await sql.query(connection, queries.deleteFromFollowersQuery(userId));
 }
 
-async function getUser(connection, userId, private) {
-    let userInfo = await sql.query(connection, queries.getUserQuery(userId));
+async function getUser(userId, private) {
+    let userInfo = await sql.poolQuery(queries.getUserQuery(userId));
     console.log(userInfo);
 
     utils.checkIfFound(userInfo);
     userInfo = userInfo[0];
 
     if (private) {
-        const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
-        const likedLists = await sql.query(connection, queries.getLikedListIdsQuery(userId));
-        const likedComments = await sql.query(connection, queries.getLikedCommentIdsQuery(userId));
+        const [following, likedLists, likedComments] = await Promise.all([
+            sql.poolQuery(queries.getFollowingIdsQuery(userId)),
+            sql.poolQuery(queries.getLikedListIdsQuery(userId)),
+            sql.poolQuery(queries.getLikedCommentIdsQuery(userId)),
+        ]);
 
-        console.log({ userInfo, following, likedLists, likedComments });
         return { ...userInfo, following, likedLists, likedComments };
     }
 
     return userInfo;
 }
 
-async function userExists(connection, username) {
-    return (await sql.query(connection, queries.getUserWithNameQuery(username))).length > 0;
+async function userExists(username) {
+    return (await sql.poolQuery(queries.getUserWithNameQuery(username))).length > 0;
 }
 
 async function follow(connection, userId, targetId) {
     if (userId === targetId) {
         throw errors.badRequest();
     }
-
 
     const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
 

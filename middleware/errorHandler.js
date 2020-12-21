@@ -1,21 +1,13 @@
-function errorMiddleWare(connection) {
-    return {
-        checkConnection: (req, res, next) => {
-            if (connection.state === "disconnected") {
-                next(connectionLost());
-                return;
-            }
-
-            next();
-        },
-        asyncError: (mwFunction) => {
-            return ((req, res, next) => {
-                Promise.resolve(mwFunction(req, res, next)).catch(next);
-            });
-        },
-        errorHandler: (req, res, next) => res.status(500).send("TODO")
+function asyncError(mwFunction) {
+    return (req, res, next) => {
+        Promise.resolve(mwFunction(req, res, next)).catch(next);
     };
 }
+
+function errorHandler(err, req, res, next) {
+    res.status(500).send("TODO")
+}
+
 
 function authError() {
     return new Error("unauthorized");
@@ -41,4 +33,13 @@ function connectionLost() {
     return new Error("PROTOCOL_CONNECTION_LOST");
 }
 
-module.exports = { errorMiddleWare, authError, notFoundError, invalidCredentialsError, badRequest, invalidPage, connectionLost };
+module.exports = {
+    asyncError,
+    errorHandler,
+    authError,
+    notFoundError,
+    invalidCredentialsError,
+    badRequest,
+    invalidPage,
+    connectionLost,
+};

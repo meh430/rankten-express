@@ -2,41 +2,40 @@ const queries = require("../queries");
 const sql = require("../sqlPromise");
 const utils = require("../utils");
 
-async function createComment(connection, comment, userId, listId) {
+async function createComment(comment, userId, listId) {
     delete comment.commentId;
 
     comment.userId = userId;
     comment.listId = listId;
     comment.dateCreated = Date.now();
 
-    const res = await sql.query(connection, queries.createCommentQuery(comment));
+    const res = await sql.poolQuery(queries.createCommentQuery(comment));
     console.log(res);
 
     return res.insertId;
 }
 
-async function updateComment(connection, commentId, userId, comment) {
+async function updateComment(commentId, userId, comment) {
     delete comment.commentId;
     delete comment.userId;
     delete comment.listId;
     delete comment.dateCreated;
 
-    const res = await sql.query(connection, queries.updateCommentQuery(commentId, userId, comment));
+    const res = await sql.poolQuery(queries.updateCommentQuery(commentId, userId, comment));
     console.log(res);
 
     utils.checkRow(res);
 }
 
-async function deleteComment(connection, commentId, userId) {
-    const res = await sql.query(connection, queries.deleteCommentQuery(commentId, userId));
+async function deleteComment(commentId, userId) {
+    const res = await sql.poolQuery(queries.deleteCommentQuery(commentId, userId));
     console.log(res);
 
     utils.checkRow();
 }
 
-async function getListComments(connection, listId, page, sort) {
-    const comments = await sql.query(
-        connection,
+async function getListComments(listId, page, sort) {
+    const comments = await sql.poolQuery(
         queries.getListCommentsQuery(listId, utils.limitAndOffset(page), utils.getSort(sort))
     );
     console.log(comments);
@@ -44,9 +43,8 @@ async function getListComments(connection, listId, page, sort) {
     return utils.validatePage(comments);
 }
 
-async function getUserComments(connection, userId, page, sort) {
-    const comments = await sql.query(
-        connection,
+async function getUserComments(userId, page, sort) {
+    const comments = await sql.poolQuery(
         queries.getUserCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))
     );
     console.log(comments);
@@ -54,8 +52,8 @@ async function getUserComments(connection, userId, page, sort) {
     return utils.validatePage(comments);
 }
 
-async function getLikedComments(connection, userId, page) {
-    return utils.validatePage(await sql.query(connection, queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page))));
+async function getLikedComments(userId, page) {
+    return utils.validatePage(await sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page))));
 }
 
 module.exports = { createComment, updateComment, deleteComment, getListComments, getUserComments, getLikedComments };

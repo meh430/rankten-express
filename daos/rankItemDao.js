@@ -42,8 +42,8 @@ async function deleteListRankItems(connection, listId) {
     utils.checkRow(res);
 }
 
-async function getListRankItems(connection, listId) {
-    const rankItems = await sql.query(connection, queries.getRankItemsQuery(listId));
+async function getListRankItems(listId) {
+    const rankItems = await sql.poolQuery(queries.getRankItemsQuery(listId));
     console.log(rankItems);
 
     return rankItems;

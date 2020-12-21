@@ -31,7 +31,7 @@ function countFollowingQuery(userId) {
 }
 
 function getUserWithNameQuery(username) {
-    return mysql.format("SELECT Users.userId FROM Users WHERE username = ?", [username]);
+    return mysql.format("SELECT Users.userId FROM rank_ten.Users WHERE username = ?", [username]);
 }
 
 function getUserQuery(userId) {

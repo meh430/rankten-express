@@ -1,8 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql");
 
-const sqlConfig = require("./config").sqlConfig;
 const sql = require("./sqlPromise");
 const models = require("./models");
 
@@ -15,22 +13,9 @@ app.use(cors());
 
 const authRoutes = require("./routes/authRoute");
 
-var connection;
-
 async function init() {
     try {
-        connection = mysql.createConnection(sqlConfig);
-
-        await sql.connect(connection);
-
-        connection.on("error", (error) => {
-            console.log("db error", error);
-            if (error.code === "PROTOCOL_CONNECTION_LOST") {
-                setTimeout(init, 15000);
-            } else {
-                throw error;
-            }
-        });
+        const connection = await sql.getConnection();
 
         await sql.query(connection, "DROP DATABASE rank_ten");
         await sql.query(connection, "CREATE DATABASE IF NOT EXISTS rank_ten");
@@ -38,14 +23,15 @@ async function init() {
         await models.initializeTables(connection);
         console.log(await sql.query(connection, "SHOW TABLES"));
 
+        connection.release();
+
         app.get("/", (req, res) => {
             res.status(200).send({ message: "Hello World!" });
         });
 
-        authRoutes(app, connection);
+        authRoutes(app);
     } catch (error) {
         console.log(error);
-        setTimeout(init, 15000);
     }
 }
 
