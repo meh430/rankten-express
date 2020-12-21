@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const expresJwt = require("express-jwt");
 const bcrypt = require("bcryptjs");
 const jwtSecret = require("../config").jwtSecret;
 const errors = require("../middleware/errorHandler");
@@ -43,6 +44,14 @@ module.exports = (app) => {
             } else {
                 throw errors.authError();
             }
+        })
+    );
+
+    app.post(
+        "/validate_token",
+        [expresJwt(jwtSecret)],
+        errors.asyncError(async (req, res, next) => {
+            res.status(200).send(await userDao.getUser(req.user.userId, true));
         })
     );
 };
