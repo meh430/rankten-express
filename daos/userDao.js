@@ -68,10 +68,14 @@ async function getUser(connection, userId, private) {
         const likedComments = await sql.query(connection, queries.getLikedCommentIdsQuery(userId));
 
         console.log({ userInfo, following, likedLists, likedComments });
-        return { userInfo, following, likedLists, likedComments };
+        return { ...userInfo, following, likedLists, likedComments };
     }
 
     return userInfo;
+}
+
+async function userExists(connection, username) {
+    return (await sql.query(connection, queries.getUserWithNameQuery(username))).length > 0;
 }
 
 async function follow(connection, userId, targetId) {
@@ -139,6 +143,7 @@ module.exports = {
     updateUser,
     deleteUser,
     getUser,
+    userExists,
     follow,
     getFollowing,
     getFollowers,

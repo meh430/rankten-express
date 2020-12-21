@@ -13,6 +13,8 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
 
+const authRoutes = require("./routes/authRoute");
+
 var connection;
 
 async function init() {
@@ -30,14 +32,17 @@ async function init() {
             }
         });
 
+        await sql.query(connection, "DROP DATABASE rank_ten");
         await sql.query(connection, "CREATE DATABASE IF NOT EXISTS rank_ten");
         await sql.query(connection, "USE rank_ten");
         await models.initializeTables(connection);
         console.log(await sql.query(connection, "SHOW TABLES"));
 
         app.get("/", (req, res) => {
-            res.status(200).send("Hello World!");
+            res.status(200).send({ message: "Hello World!" });
         });
+
+        authRoutes(app, connection);
     } catch (error) {
         console.log(error);
         setTimeout(init, 15000);

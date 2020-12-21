@@ -47,16 +47,16 @@ const commentsTable =
 const createListLikesTable =
     "CREATE TABLE IF NOT EXISTS ListLikes(" +
     "userId int NOT NULL," +
-    "likedListId int NOT NULL," +
+    "listId int NOT NULL," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FOREIGN KEY (likedListId) REFERENCES RankedLists(listId) ON DELETE CASCADE)";
+    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE)";
 
 const createCommentLikesTable =
     "CREATE TABLE IF NOT EXISTS CommentLikes(" +
     "userId int NOT NULL," +
-    "likedCommentId int NOT NULL," +
+    "commentId int NOT NULL," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FOREIGN KEY (likedCommentId) REFERENCES Comments(commentId) ON DELETE CASCADE)";
+    "FOREIGN KEY (commentId) REFERENCES Comments(commentId) ON DELETE CASCADE)";
 
 const createFollowsTable =
     "CREATE TABLE IF NOT EXISTS Follows(" +

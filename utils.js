@@ -40,7 +40,7 @@ function checkRow(result) {
     }
 }
 
-function checkIfFound(result) {
+function checkIfFound(results) {
     if (!results.length) {
         throw errors.notFoundError();
     }

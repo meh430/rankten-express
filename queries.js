@@ -30,6 +30,10 @@ function countFollowingQuery(userId) {
     return mysql.format("SELECT COUNT(Follows.followsId) FROM Follows WHERE Follows.userId = ?", [userId]);
 }
 
+function getUserWithNameQuery(username) {
+    return mysql.format("SELECT Users.userId FROM Users WHERE username = ?", [username]);
+}
+
 function getUserQuery(userId) {
     return mysql.format(
         "SELECT Users.*, (" +
@@ -362,6 +366,7 @@ module.exports = {
     countUserCommentsQuery,
     countFollowersQuery,
     countFollowingQuery,
+    getUserWithNameQuery,
     getUserQuery,
     getFollowingIdsQuery,
     getFollowerIdsQuery,
