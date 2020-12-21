@@ -1,5 +1,4 @@
 const errors = require("./middleware/errorHandler");
-
 const sortOptions = {
     newest: "dateCreated DESC",
     oldest: "dateCreated ASC",
@@ -7,7 +6,7 @@ const sortOptions = {
     points: "rankPoints DESC"
 }
 
-const likes, newest, oldest = [0, 1, 2];
+const [likes, newest, oldest] = [0, 1, 2];
 
 function limitAndOffset(page, numItems = 10) {
     return [10, page*numItems];
@@ -44,4 +43,11 @@ function getOnePropArray(objects, property) {
     return objects.map(obj => obj[property]).filter(val => val !== undefined);
 }
 
-module.exports = { limitAndOffset, getSort, validatePage, checkRow, getOnePropArray };
+
+async function asyncForEach(arr, callback) {
+    for (i = 0; i < arr.length; i++) {
+        await callback(arr[i]);
+    }
+}
+
+module.exports = { limitAndOffset, getSort, validatePage, checkRow, getOnePropArray, asyncForEach };

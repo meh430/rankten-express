@@ -3,6 +3,8 @@ const sql = require("../models/sqlPromise");
 const utils = require("../utils");
 
 async function createRankItem(connection, rankItem, listId, listTitle, private) {
+    delete rankItem.itemId;
+
     rankItem.listId = listId;
     rankItem.listTitle = listTitle;
     rankItem.private = private;
@@ -14,6 +16,7 @@ async function createRankItem(connection, rankItem, listId, listTitle, private) 
 }
 
 async function updateRankItem(connection, itemId, rankItem, listTitle, private) {
+    delete rankItem.itemId;
     delete rankItem.listId;
 
     rankItem.listTitle = listTitle;
@@ -53,4 +56,11 @@ async function getListRankItemIds(connection, listId) {
     return rankItemIds;
 }
 
-module.exports = { createRankItem, updateRankItem, deleteRankItem, deleteListRankItems, getListRankItems, getListRankItemIds };
+module.exports = {
+    createRankItem,
+    updateRankItem,
+    deleteRankItem,
+    deleteListRankItems,
+    getListRankItems,
+    getListRankItemIds,
+};

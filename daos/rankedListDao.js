@@ -4,48 +4,94 @@ const rankItemDao = require("./rankItemDao");
 const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
-async function createRankedList() {
+async function createRankedList(connection, userId, rankedList) {
+    const transaction = sql.transaction(connection);
 
+    const rankItems = rankedList.rankItems;
+    if (rankItems.length < 1 || rankItems.length > 10) {
+        throw errors.badRequest();
+    }
+
+    delete rankedList.rankItems;
+    delete rankedList.listId;
+
+    rankedList.userId = userId;
+    rankedList.dateCreated = Date.now();
+
+    try {
+        await transaction.beginTransaction();
+
+        const res = await sql.query(connection, queries.createRankedListQuery(rankedList));
+        await utils.asyncForEach(rankItems, async (rankItem) => {
+            await rankItemDao.createRankItem(connection, rankItem, res.insertId, rankedList.title, rankedList.private);
+        });
+
+        await transaction.commit();
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
 }
 
 async function updateRankedList(connection, listId, userId, rankedList) {
+    const transaction = sql.transaction(connection);
+
     const rankItems = rankedList.rankItems;
 
     if (rankItems.length < 1 || rankItems.length > 10) {
         throw errors.badRequest();
-    }  
+    }
 
     delete rankedList.listId;
     delete rankedList.userId;
     delete rankedList.dateCreated;
     delete rankedList.rankItems;
 
-    const listRes = await sql.query(connection, queries.updateRankedListQuery(rankedList, listId, userId));
-    utils.checkRow(listRes);
+    try {
+        await transaction.beginTransaction();
 
-    const currentItemIds = await rankItemDao.getListRankItemIds(connection, listId);
-    console.log(currentItemIds);
+        const listRes = await sql.query(connection, queries.updateRankedListQuery(rankedList, listId, userId));
+        utils.checkRow(listRes);
 
-    const givenItemIds = utils.getOnePropArray(rankItems, 'itemId');
+        const currentItemIds = await rankItemDao.getListRankItemIds(connection, listId);
+        console.log(currentItemIds);
 
-    currentItemIds.forEach(id => {
-        if (!givenItemIds.includes(id)) {
-            await rankItemDao.deleteRankItem(connection, id);
-        }
-    });
+        const givenItemIds = utils.getOnePropArray(rankItems, "itemId");
 
-    rankItems.forEach(rankItem => {
-        if ('itemId' in rankItem) {
-            if (currentItemIds.includes(rankItem.itemId)) {
-                await rankItemDao.updateRankItem(connection, rankItem.itemId, rankItem, rankedList.title, rankedList.private);
-            } else {
-                throw errors.badRequest();
+        await utils.asyncForEach(currentItemIds, async (id) => {
+            if (!givenItemIds.includes(id)) {
+                await rankItemDao.deleteRankItem(connection, id);
             }
-        } else {
-            await rankItemDao.createRankItem(connection, rankItem, listId, rankedList.title, rankedList.private);
-        }
-    });
-}    
+        });
+
+        await utils.asyncForEach(rankItems, async (rankItem) => {
+            if ("itemId" in rankItem) {
+                if (currentItemIds.includes(rankItem.itemId)) {
+                    await rankItemDao.updateRankItem(
+                        connection,
+                        rankItem.itemId,
+                        rankItem,
+                        rankedList.title,
+                        rankedList.private
+                    );
+                } else {
+                    throw errors.badRequest();
+                }
+            } else {
+                await rankItemDao.createRankItem(connection, rankItem, listId, rankedList.title, rankedList.private);
+            }
+        });
+
+        await transaction.commit();
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+}
+
+async function deleteRankedList(connection, listId, userId) {
+    await sql.query(connection, queries.deleteRankedListQuery(listId, userId));
+}
 
 async function getRankedList(connection, listId) {
     const rankedList = await sql.query(connection, queries.getRankedListQuery(listId));
@@ -135,17 +181,33 @@ async function getUserLists(connection, userId, page, sort, all = false) {
 }
 
 async function getFeed(connection, userId) {
-    const lastDay = Date.now() - (24 * 60 * 60 * 1000);
+    const lastDay = Date.now() - 24 * 60 * 60 * 1000;
     const feedList = [];
     const followingIds = await sql.query(connection, queries.getFollowingIdsQuery(userId));
 
-    followingIds.forEach(id => {
-        feedList.push(await getRankedListPreviews(connection, await sql.query(connection, queries.getFeedQuery(id, lastDay))));
+    await utils.asyncForEach(followingIds, async (id) => {
+        feedList.push(
+            await getRankedListPreviews(connection, await sql.query(connection, queries.getFeedQuery(id, lastDay)))
+        );
     });
 
     return feedList;
 }
 
 async function searchLists(connection, query, page, sort) {
-    return await getRankedListPreviews(connection, await sql.query(connection, queries.searchListsQuery(query, utils.limitAndOffset(page), utils.getSort(sort))));
+    return await getRankedListPreviews(
+        connection,
+        await sql.query(connection, queries.searchListsQuery(query, utils.limitAndOffset(page), utils.getSort(sort)))
+    );
 }
+
+module.exports = {
+    createRankedList,
+    updateRankedList,
+    deleteRankedList,
+    getRankedList,
+    getDiscoverLists,
+    getLikedLists,
+    getUserLists,
+    getFeed,
+};

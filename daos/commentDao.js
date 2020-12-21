@@ -16,6 +16,11 @@ async function createComment(connection, comment, userId, listId) {
 }
 
 async function updateComment(connection, commentId, userId, comment) {
+    delete comment.commentId;
+    delete comment.userId;
+    delete comment.listId;
+    delete comment.dateCreated;
+
     const res = await sql.query(connection, queries.updateCommentQuery(commentId, userId, comment));
     console.log(res);
 
