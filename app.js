@@ -1,12 +1,49 @@
 const express = require("express");
+const cors = require("cors");
+const mysql = require("mysql");
+
+const sqlConfig = require("./config").sqlConfig;
+const sql = require("./sqlPromise");
+const models = require("./models");
+
 const app = express();
 const port = 3000;
-const sql = require("./models/database");
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-});
+app.use(cors());
+
+var connection;
+
+async function init() {
+    try {
+        connection = mysql.createConnection(sqlConfig);
+
+        await sql.connect(connection);
+
+        connection.on("error", (error) => {
+            console.log("db error", error);
+            if (error.code === "PROTOCOL_CONNECTION_LOST") {
+                setTimeout(init, 15000);
+            } else {
+                throw error;
+            }
+        });
+
+        await sql.query(connection, "CREATE DATABASE IF NOT EXISTS rank_ten");
+        await sql.query(connection, "USE rank_ten");
+        await models.initializeTables(connection);
+        console.log(await sql.query(connection, "SHOW TABLES"));
+
+        app.get("/", (req, res) => {
+            res.send("Hello World!");
+        });
+    } catch (error) {
+        console.log(error);
+        setTimeout(init, 15000);
+    }
+}
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`App listening at http://localhost:${port}`);
 });
+
+init();
