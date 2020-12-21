@@ -5,9 +5,8 @@ function asyncError(mwFunction) {
 }
 
 function errorHandler(err, req, res, next) {
-    res.status(500).send("TODO")
+    res.status(500).send("TODO");
 }
-
 
 function authError() {
     return new Error("unauthorized");

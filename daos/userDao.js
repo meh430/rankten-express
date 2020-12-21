@@ -26,7 +26,7 @@ async function createUser(user) {
     return res.insertId;
 }
 
-async function updateUser(connection, userId, user) {
+async function updateUser(userId, user) {
     delete user.userId;
     delete user.dateCreated;
     delete user.rankPoints;
@@ -40,19 +40,21 @@ async function updateUser(connection, userId, user) {
         user.password = bcrypt.hashSync(user.password);
     }
 
-    const res = await sql.query(connection, queries.updateUserQuery(userId, user));
+    const res = await sql.poolQuery(queries.updateUserQuery(userId, user));
     console.log(res);
 
     utils.checkRow(res);
 }
 
-async function deleteUser(connection, userId) {
-    const res = await sql.query(connection, queries.deleteUserQuery(userId));
-    console.log(res);
+async function deleteUser(userId) {
+    sql.performTransaction(async () => {
+        const res = await sql.query(connection, queries.deleteUserQuery(userId));
+        console.log(res);
 
-    utils.checkRow(res);
+        utils.checkRow(res);
 
-    await sql.query(connection, queries.deleteFromFollowersQuery(userId));
+        await sql.query(connection, queries.deleteFromFollowersQuery(userId));
+    });
 }
 
 async function getUser(userId, private) {
@@ -79,22 +81,22 @@ async function userExists(username) {
     return (await sql.poolQuery(queries.getUserWithNameQuery(username))).length > 0;
 }
 
-async function follow(connection, userId, targetId) {
+async function follow(userId, targetId) {
     if (userId === targetId) {
         throw errors.badRequest();
     }
 
-    const following = await sql.query(connection, queries.getFollowingIdsQuery(userId));
+    const following = await sql.poolQuery(queries.getFollowingIdsQuery(userId));
 
     if (following.includes(targetId)) {
-        const unfollowed = await sql.query(connection, queries.unfollowQuery(userId, targetId));
+        const unfollowed = await sql.poolQuery(queries.unfollowQuery(userId, targetId));
         console.log(unfollowed);
 
         utils.checkRow(unfollowed);
 
         return "unfollowed user";
     } else {
-        const followed = await sql.query(connection, queries.followQuery(userId, targetId));
+        const followed = await sql.poolQuery(queries.followQuery(userId, targetId));
         console.log(followed);
 
         utils.checkRow(followed);
@@ -103,34 +105,33 @@ async function follow(connection, userId, targetId) {
     }
 }
 
-async function getFollowing(connection, userId) {
-    const following = await sql.query(connection, queries.getFollowingQuery(userId));
+async function getFollowing(userId) {
+    const following = await sql.poolQuery(queries.getFollowingQuery(userId));
     console.log(following);
 
     return following;
 }
 
-async function getFollowers(connection, userId) {
-    const followers = await sql.query(connection, queries.getFollowersQuery(userId));
+async function getFollowers(userId) {
+    const followers = await sql.poolQuery(queries.getFollowersQuery(userId));
     console.log(followers);
 
     return followers;
 }
 
-async function likeUnlike(connection, userId, targetId, query) {
-    await sql.query(connection, query(userId, targetId));
+async function likeUnlike(userId, targetId, query) {
+    await sql.query(query(userId, targetId));
 }
 
-async function getListLikers(connection, listId) {
-    const likers = await sql.query(connection, queries.getListLikersQuery(listId));
+async function getListLikers(listId) {
+    const likers = await sql.poolQuery(queries.getListLikersQuery(listId));
     console.log(likers);
 
     return likers;
 }
 
-async function searchUsers(connection, query, page, sort) {
-    const users = await sql.query(
-        connection,
+async function searchUsers(query, page, sort) {
+    const users = await sql.poolQuery(
         queries.searchUsersQuery(query, utils.limitAndOffset(page, 100), utils.getSort(sort, true))
     );
     console.log(users);

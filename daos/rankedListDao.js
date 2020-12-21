@@ -5,9 +5,6 @@ const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
 async function createRankedList(userId, rankedList) {
-    const connection = await sql.getConnection();
-    const transaction = sql.transaction(connection);
-
     const rankItems = rankedList.rankItems;
     if (rankItems.length < 1 || rankItems.length > 10) {
         throw errors.badRequest();
@@ -19,27 +16,15 @@ async function createRankedList(userId, rankedList) {
     rankedList.userId = userId;
     rankedList.dateCreated = Date.now();
 
-    try {
-        await transaction.beginTransaction();
-
+    sql.performTransaction(async () => {
         const res = await sql.query(connection, queries.createRankedListQuery(rankedList));
         await utils.asyncForEach(rankItems, async (rankItem) => {
             await rankItemDao.createRankItem(connection, rankItem, res.insertId, rankedList.title, rankedList.private);
         });
-
-        await transaction.commit();
-    } catch (error) {
-        await transaction.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
+    });
 }
 
 async function updateRankedList(listId, userId, rankedList) {
-    const connection = await sql.getConnection();
-    const transaction = sql.transaction(connection);
-
     const rankItems = rankedList.rankItems;
 
     if (rankItems.length < 1 || rankItems.length > 10) {
@@ -51,9 +36,7 @@ async function updateRankedList(listId, userId, rankedList) {
     delete rankedList.dateCreated;
     delete rankedList.rankItems;
 
-    try {
-        await transaction.beginTransaction();
-
+    sql.performTransaction(async () => {
         const listRes = await sql.query(connection, queries.updateRankedListQuery(rankedList, listId, userId));
         utils.checkRow(listRes);
 
@@ -85,14 +68,7 @@ async function updateRankedList(listId, userId, rankedList) {
                 await rankItemDao.createRankItem(connection, rankItem, listId, rankedList.title, rankedList.private);
             }
         });
-
-        await transaction.commit();
-    } catch (error) {
-        await transaction.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
+    });
 }
 
 async function deleteRankedList(listId, userId) {

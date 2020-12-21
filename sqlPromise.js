@@ -77,4 +77,22 @@ const transaction = async(connection) => {
     };
 };
 
-module.exports = { poolQuery, query, queryValues, connect, transaction, getConnection };
+async function performTransaction(callback) {
+    const connection = await getConnection();
+    const transaction = transaction(connection);
+
+    try {
+        await transaction.beginTransaction();
+
+        await callback();
+
+        await transaction.commit();
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
+module.exports = { poolQuery, query, queryValues, connect, transaction, getConnection, performTransaction };
