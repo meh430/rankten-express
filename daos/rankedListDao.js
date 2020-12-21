@@ -1,5 +1,5 @@
 const queries = require("../queries");
-const sql = require("../models/sqlPromise");
+const sql = require("../sqlPromise");
 const rankItemDao = require("./rankItemDao");
 const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
@@ -210,4 +210,5 @@ module.exports = {
     getLikedLists,
     getUserLists,
     getFeed,
+    searchLists,
 };

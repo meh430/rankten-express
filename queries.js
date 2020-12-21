@@ -161,8 +161,12 @@ function likeListQuery(userId, listId) {
 }
 
 function getListLikersQuery(listId) {
-    return mysql.format(userPreviewAttributes + "FROM ListLikes JOIN Users ON " +
-        "ListLikes.userId = Users.userId WHERE ListLikes.userId = ?", [listId]);
+    return mysql.format(
+        userPreviewAttributes +
+            "FROM ListLikes JOIN Users ON " +
+            "ListLikes.userId = Users.userId WHERE ListLikes.userId = ?",
+        [listId]
+    );
 }
 
 function unlikeCommentQuery(userId, commentId) {
@@ -231,9 +235,12 @@ function deleteListRankItemsQuery(listId) {
 }
 
 function getCommentPreview(listId) {
-    return mysql.format("SELECT Comments.comment, Comments.dateCreated, Users.username, " +
-        "Users.profilePic, FROM Comments JOIN Users ON " +
-        "Comments.userId = Users.userId WHERE Comments.listId = ? LIMIT 1", [listId]);
+    return mysql.format(
+        "SELECT Comments.comment, Comments.dateCreated, Users.username, " +
+            "Users.profilePic, FROM Comments JOIN Users ON " +
+            "Comments.userId = Users.userId WHERE Comments.listId = ? LIMIT 1",
+        [listId]
+    );
 }
 
 function deleteRankedListQuery(listId, userId) {
@@ -393,5 +400,5 @@ module.exports = {
     searchRankItemsQuery,
     countSearchListsQuery,
     searchListsQuery,
-    page
+    page,
 };

@@ -1,5 +1,5 @@
 const queries = require("../queries");
-const sql = require("../models/sqlPromise");
+const sql = require("../sqlPromise");
 const utils = require("../utils");
 
 async function createComment(connection, comment, userId, listId) {
@@ -35,14 +35,20 @@ async function deleteComment(connection, commentId, userId) {
 }
 
 async function getListComments(connection, listId, page, sort) {
-    const comments = await sql.query(connection, queries.getListCommentsQuery(listId, utils.limitAndOffset(page), utils.getSort(sort)));
+    const comments = await sql.query(
+        connection,
+        queries.getListCommentsQuery(listId, utils.limitAndOffset(page), utils.getSort(sort))
+    );
     console.log(comments);
 
     return utils.validatePage(comments);
 }
 
 async function getUserComments(connection, userId, page, sort) {
-    const comments = await sql.query(connection, queries.getUserCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort)));
+    const comments = await sql.query(
+        connection,
+        queries.getUserCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))
+    );
     console.log(comments);
 
     return utils.validatePage(comments);

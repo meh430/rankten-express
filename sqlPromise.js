@@ -24,6 +24,17 @@ const queryValues = (connection, sqlQuery, values) => {
     });
 };
 
+const connect = (connection) => {
+    return new Promise((resolve, reject) => {
+        connection.connect((err) => {
+            if (err) {
+                reject(err);
+            }
+
+            resolve("connected!");
+        });
+    });
+};
 
 const transaction = (connection) => {
     return {
@@ -35,8 +46,8 @@ const transaction = (connection) => {
         },
         rollback() {
             return util.promisify(connection.rollback).call(connection);
-        }
+        },
     };
 };
 
-module.exports = { query, queryValues, transaction};
+module.exports = { query, queryValues, connect, transaction };

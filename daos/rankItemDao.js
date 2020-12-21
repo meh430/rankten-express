@@ -1,5 +1,5 @@
 const queries = require("../queries");
-const sql = require("../models/sqlPromise");
+const sql = require("../sqlPromise");
 const utils = require("../utils");
 
 async function createRankItem(connection, rankItem, listId, listTitle, private) {

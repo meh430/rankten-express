@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const queries = require("../queries");
-const sql = require("../models/sqlPromise");
+const sql = require("../sqlPromise");
 const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
