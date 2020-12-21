@@ -3,7 +3,10 @@ const mysql = require("mysql");
 const sql = require("./sqlPromise");
 const models = require("./models");
 
+// TODO: maybe move all this to app.js to ensure connection?
+
 const connection = mysql.createConnection(config);
+
 (async () => {
     try {
         await sql.connect(connection);

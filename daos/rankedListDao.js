@@ -166,10 +166,10 @@ async function getDiscoverLists(connection, page, sort) {
 }
 
 async function getLikedLists(connection, userId, page) {
-    return await getRankedListPreviews(
+    return utils.validatePage(await getRankedListPreviews(
         connection,
         await sql.query(connection, queries.getLikedListsQuery(userId, utils.limitAndOffset(page)))
-    );
+    ));
 }
 
 async function getUserLists(connection, userId, page, sort, all = false) {
@@ -198,10 +198,10 @@ async function getFeed(connection, userId) {
 }
 
 async function searchLists(connection, query, page, sort) {
-    return await getRankedListPreviews(
+    return utils.validatePage(await getRankedListPreviews(
         connection,
         await sql.query(connection, queries.searchListsQuery(query, utils.limitAndOffset(page), utils.getSort(sort)))
-    );
+    ));
 }
 
 module.exports = {
