@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const sql = require("./sqlPromise");
 const models = require("./models");
+const routes = require("./routes/index");
 
 const app = express();
 const port = 3000;
@@ -10,8 +11,6 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
-
-const authRoutes = require("./routes/authRoute");
 
 async function init() {
     try {
@@ -29,7 +28,7 @@ async function init() {
             res.status(200).send({ message: "Hello World!" });
         });
 
-        authRoutes(app);
+        routes(app);
     } catch (error) {
         console.log(error);
     }

@@ -63,15 +63,15 @@ const connect = async(connection) => {
     });
 };
 
-const transaction = async(connection) => {
+const getTransaction = (connection) => {
     return {
-        async beginTransaction() {
+        beginTransaction() {
             return util.promisify(connection.beginTransaction).call(connection);
         },
-        async commit() {
+        commit() {
             return util.promisify(connection.commit).call(connection);
         },
-        async rollback() {
+        rollback() {
             return util.promisify(connection.rollback).call(connection);
         },
     };
@@ -79,12 +79,13 @@ const transaction = async(connection) => {
 
 async function performTransaction(callback) {
     const connection = await getConnection();
-    const transaction = transaction(connection);
+    const transaction = getTransaction(connection);
+
 
     try {
         await transaction.beginTransaction();
 
-        await callback();
+        await callback(connection);
 
         await transaction.commit();
     } catch (error) {
@@ -95,4 +96,4 @@ async function performTransaction(callback) {
     }
 }
 
-module.exports = { poolQuery, query, queryValues, connect, transaction, getConnection, performTransaction };
+module.exports = { poolQuery, query, queryValues, connect, getTransaction, getConnection, performTransaction };

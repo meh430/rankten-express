@@ -47,7 +47,7 @@ async function updateUser(userId, user) {
 }
 
 async function deleteUser(userId) {
-    sql.performTransaction(async () => {
+    sql.performTransaction(async (connection) => {
         const res = await sql.query(connection, queries.deleteUserQuery(userId));
         console.log(res);
 
@@ -145,6 +145,10 @@ async function searchUsers(query, page, sort) {
     return utils.validatePage(users);
 }
 
+async function getAllUsers() {
+    return await sql.poolQuery("SELECT * FROM Users");
+}
+
 module.exports = {
     createUser,
     updateUser,
@@ -157,4 +161,5 @@ module.exports = {
     likeUnlike,
     getListLikers,
     searchUsers,
+    getAllUsers
 };

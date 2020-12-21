@@ -16,7 +16,7 @@ async function createRankedList(userId, rankedList) {
     rankedList.userId = userId;
     rankedList.dateCreated = Date.now();
 
-    sql.performTransaction(async () => {
+    sql.performTransaction(async (connection) => {
         const res = await sql.query(connection, queries.createRankedListQuery(rankedList));
         await utils.asyncForEach(rankItems, async (rankItem) => {
             await rankItemDao.createRankItem(connection, rankItem, res.insertId, rankedList.title, rankedList.private);
@@ -36,7 +36,7 @@ async function updateRankedList(listId, userId, rankedList) {
     delete rankedList.dateCreated;
     delete rankedList.rankItems;
 
-    sql.performTransaction(async () => {
+    sql.performTransaction(async (connection) => {
         const listRes = await sql.query(connection, queries.updateRankedListQuery(rankedList, listId, userId));
         utils.checkRow(listRes);
 
