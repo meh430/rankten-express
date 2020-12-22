@@ -16,7 +16,7 @@ async function createUser(user) {
     user.dateCreated = Date.now();
 
     if (!user.username.match(namePattern) || !user.password.match(passwordPattern)) {
-        throw errors.invalidCredentialsError();
+        throw errors.badRequest();
     }
 
     user.password = bcrypt.hashSync(user.password);
@@ -33,7 +33,7 @@ async function updateUser(userId, user) {
 
     if ("password" in user) {
         if (!user.password.match(passwordPattern)) {
-            throw errors.invalidCredentialsError();
+            throw errors.badRequest();
         }
 
         user.password = bcrypt.hashSync(user.password);

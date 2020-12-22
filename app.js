@@ -4,6 +4,7 @@ const cors = require("cors");
 const sql = require("./sqlPromise");
 const models = require("./models");
 const routes = require("./routes/index");
+const errors = require("./middleware/errorHandler");
 
 const app = express();
 const port = 3000;
@@ -11,6 +12,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
+app.use(errors.errorHandler);
 
 async function init() {
     try {
