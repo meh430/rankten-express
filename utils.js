@@ -58,4 +58,6 @@ async function asyncForEach(arr, callback) {
     }
 }
 
-module.exports = { limitAndOffset, getSort, validatePage, checkRow, checkIfFound, getOnePropArray, asyncForEach };
+const hoursToSec = hours => hours * 60 * 60;
+
+module.exports = { limitAndOffset, getSort, validatePage, checkRow, checkIfFound, getOnePropArray, asyncForEach, hoursToSec };

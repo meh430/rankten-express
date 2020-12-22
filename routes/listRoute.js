@@ -3,11 +3,14 @@ const jwtSecret = require("../config").jwtSecret;
 const errors = require("../middleware/errorHandler");
 const parameters = require("../middleware/parameters");
 const rankedlistDao = require("../daos/rankedListDao");
+const redisCache = require("../redisCache");
+const cacher = require("../middleware/cacher");
+const utils = require("../utils");
 
 module.exports = (app) => {
     app.get(
         "/discover/:page/:sort",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(2, utils.hoursToSec(2))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await rankedlistDao.getDiscoverLists(req.params.page, req.params.sort));
         })
@@ -43,7 +46,7 @@ module.exports = (app) => {
             await rankedlistDao.createRankedList(req.user.userId, req.body);
             res.status(200).send("Created ranked list");
         })
-    );  
+    );
 
     // Updates a list, see POST for schema. NOTE: rankItem object may contain "itemId"
     app.put(
@@ -68,7 +71,7 @@ module.exports = (app) => {
     // Returns lists created by a user
     app.get(
         "/rankedlists/:userId/:page/:sort",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(3, utils.hoursToSec(1))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(
                 await rankedlistDao.getUserLists(req.params.userId, req.params.page, req.params.sort, false)
@@ -92,8 +95,16 @@ module.exports = (app) => {
         "/feed/:page",
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
-            const feed = await rankedlistDao.getFeed(req.user.userId);
-            res.status(200).send(feed.slice(req.params.page * 10, req.params.page * 10 + 10));
+            const keyName = "feed:" + req.user.userId;
+            const cachedFeed = await redisCache.get(keyName);
+
+            if (!req.query.re && cachedFeed) {
+                res.status(200).send(JSON.parse(cachedFeed).slice(req.params.page * 10, req.params.page * 10 + 10));
+            } else {
+                const feed = await rankedlistDao.getFeed(req.user.userId);
+                await redisCache.set(keyName, JSON.stringify(feed), utils.hoursToSec(2));
+                res.status(200).send(feed.slice(req.params.page * 10, req.params.page * 10 + 10));
+            }
         })
     );
 };

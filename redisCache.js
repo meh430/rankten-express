@@ -2,6 +2,10 @@ const redisConfig = require("./config").redisConfig;
 const redis = require("redis");
 const client = redis.createClient(redisConfig);
 
+client.on("error", (error) => {
+  console.error(error);
+});
+
 function inPromise(resolve, reject, error, res) {
     if (error) {
         reject(error);

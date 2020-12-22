@@ -3,6 +3,8 @@ const jwtSecret = require("../config").jwtSecret;
 const errors = require("../middleware/errorHandler");
 const parameters = require("../middleware/parameters");
 const userDao = require("../daos/userDao");
+const cacher = require("../middleware/cacher");
+const utils = require("../utils");
 
 module.exports = (app) => {
     // Follows or unfollows user
@@ -19,7 +21,7 @@ module.exports = (app) => {
     // Returns everyone a user is following
     app.get(
         "/following/:userId",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(3, utils.hoursToSec(12))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await userDao.getFollowing(req.params.userId));
         })
@@ -28,7 +30,7 @@ module.exports = (app) => {
     // Returns the followers of a user
     app.get(
         "/followers/:userId",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(3, utils.hoursToSec(12))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await userDao.getFollowers(req.params.userId));
         })

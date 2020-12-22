@@ -6,6 +6,8 @@ const rankedlistDao = require("../daos/rankedListDao");
 const commentDao = require("../daos/commentDao");
 const userDao = require("../daos/userDao");
 const queries = require("../queries");
+const cacher = require("../middleware/cacher");
+const utils = require("../utils");
 
 module.exports = (app) => {
     // Likes or unlikes list
@@ -29,7 +31,7 @@ module.exports = (app) => {
     // Returns all users that liked a list
     app.get(
         "/like/:listId",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(3, utils.hoursToSec(2))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await userDao.getListLikers(req.params.listId));
         })
