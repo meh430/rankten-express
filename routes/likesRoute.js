@@ -58,7 +58,7 @@ module.exports = (app) => {
     // Returns all comments liked by user
     app.get(
         "/liked_comments/:page",
-        [expressJwt(jwtSecret), parameters.parseParameters],
+        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await commentDao.getLikedComments(req.user.userId, req.params.page));
         })
@@ -67,7 +67,7 @@ module.exports = (app) => {
     // Returns all lists liked by user
     app.get(
         "/likes/:page",
-        [expressJwt(jwtSecret), parameters.parseParameters],
+        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await rankedlistDao.getLikedLists(req.user.userId, req.params.page));
         })

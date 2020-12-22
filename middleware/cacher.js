@@ -1,10 +1,12 @@
 const redisCache = require("../redisCache");
 
-function getRouteCacher(slashSplit, ex = 3600) {
+function getRouteCacher(slashSplit, ex = 3600, private = false) {
     const routeCacher = async (req, res, next) => {
         try {
-            const keyName = req.originalUrl;
-            const baseName = req.originalUrl.split("/", slashSplit).join("/");
+            const keyName = private ? `user-${req.user.userId}:${req.originalUrl}` : req.originalUrl;
+            const baseName = private
+                ? `user-${req.user.userId}:${req.originalUrl.split("/", slashSplit).join("/")}`
+                : req.originalUrl.split("/", slashSplit).join("/");
 
             // if refreshing, delete cached route and move on
             if (req.query.re) {

@@ -82,7 +82,7 @@ module.exports = (app) => {
     // Returns lists created by user, including private
     app.get(
         "/rankedlistsp/:page/:sort",
-        [expressJwt(jwtSecret), parameters.parseParameters],
+        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(
                 await rankedlistDao.getUserLists(req.user.userId, req.params.page, req.params.sort, true)

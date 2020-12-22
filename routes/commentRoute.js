@@ -4,6 +4,8 @@ const errors = require("../middleware/errorHandler");
 const parameters = require("../middleware/parameters");
 const rankedlistDao = require("../daos/rankedListDao");
 const commentDao = require("../daos/commentDao");
+const cacher = require("../middleware/cacher");
+const utils = require("../utils");
 
 module.exports = (app) => {
     // Returns the list a specified comment belongs to
@@ -54,7 +56,7 @@ module.exports = (app) => {
     // Returns all comments on a list
     app.get(
         "/comments/:listId/:page/:sort",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(3, utils.hoursToSec(2))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await commentDao.getListComments(req.params.listId, req.params.page, req.params.sort));
         })
@@ -63,7 +65,7 @@ module.exports = (app) => {
     // Returns all comments made by user
     app.get(
         "/user_comments/:page/:sort",
-        [expressJwt(jwtSecret), parameters.parseParameters],
+        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await commentDao.getUserComments(req.user.userId, req.params.page, req.params.sort));
         })
