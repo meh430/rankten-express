@@ -16,7 +16,7 @@ async function init() {
     try {
         const connection = await sql.getConnection();
 
-        await sql.query(connection, "DROP DATABASE rank_ten");
+        //await sql.query(connection, "DROP DATABASE rank_ten");
         await sql.query(connection, "CREATE DATABASE IF NOT EXISTS rank_ten");
         await sql.query(connection, "USE rank_ten");
         await models.initializeTables(connection);
