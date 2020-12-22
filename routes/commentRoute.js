@@ -4,8 +4,6 @@ const errors = require("../middleware/errorHandler");
 const parameters = require("../middleware/parameters");
 const rankedlistDao = require("../daos/rankedListDao");
 const commentDao = require("../daos/commentDao");
-const userDao = require("../daos/userDao");
-const queries = require("../queries");
 
 module.exports = (app) => {
     app.get(

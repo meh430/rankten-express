@@ -5,7 +5,6 @@ const sortOptions = {
     oldest: "dateCreated ASC",
     likes: "numLikes DESC",
     points: "rankPoints DESC",
-
 };
 
 const [likes, newest, oldest, relevance] = [0, 1, 2, 3];
@@ -15,7 +14,6 @@ function limitAndOffset(page, numItems = 10) {
 }
 
 function getSort(sort, user = false) {
-
     switch (sort) {
         case likes:
             return user ? sortOptions.points : sortOptions.likes;

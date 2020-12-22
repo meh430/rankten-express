@@ -11,9 +11,9 @@ const getConnection = async () => {
             }
 
             resolve(connection);
-        })
-    })
-}
+        });
+    });
+};
 
 const poolQuery = async (sqlQuery) => {
     return new Promise((resolve, reject) => {
@@ -25,9 +25,9 @@ const poolQuery = async (sqlQuery) => {
             resolve(results);
         });
     });
-}
+};
 
-const query = async(connection, sqlQuery) => {
+const query = async (connection, sqlQuery) => {
     return new Promise((resolve, reject) => {
         connection.query(sqlQuery, (err, results, fields) => {
             if (err) {
@@ -39,7 +39,7 @@ const query = async(connection, sqlQuery) => {
     });
 };
 
-const queryValues = async(connection, sqlQuery, values) => {
+const queryValues = async (connection, sqlQuery, values) => {
     return new Promise((resolve, reject) => {
         connection.query(sqlQuery, values, (err, results, fields) => {
             if (err) {
@@ -51,7 +51,7 @@ const queryValues = async(connection, sqlQuery, values) => {
     });
 };
 
-const connect = async(connection) => {
+const connect = async (connection) => {
     return new Promise((resolve, reject) => {
         connection.connect((err) => {
             if (err) {
@@ -80,7 +80,6 @@ const getTransaction = (connection) => {
 async function performTransaction(callback) {
     const connection = await getConnection();
     const transaction = getTransaction(connection);
-
 
     try {
         await transaction.beginTransaction();

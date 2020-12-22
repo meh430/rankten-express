@@ -415,5 +415,5 @@ module.exports = {
     countSearchListsQuery,
     searchListsQuery,
     page,
-    getCommentListQuery
+    getCommentListQuery,
 };

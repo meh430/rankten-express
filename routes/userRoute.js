@@ -1,4 +1,3 @@
-const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
 const jwtSecret = require("../config").jwtSecret;
 const errors = require("../middleware/errorHandler");

@@ -58,4 +58,12 @@ async function getCommentList(commentId) {
     return comment[0].listId;
 }
 
-module.exports = { createComment, updateComment, deleteComment, getListComments, getUserComments, getLikedComments, getCommentList };
+module.exports = {
+    createComment,
+    updateComment,
+    deleteComment,
+    getListComments,
+    getUserComments,
+    getLikedComments,
+    getCommentList,
+};
