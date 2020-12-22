@@ -94,6 +94,10 @@ function sortAndPage(page, sort) {
     return " ORDER BY " + sort + page(page);
 }
 
+function getCommentListQuery(commentId) {
+    return mysql.format("SELECT listId from Comments WHERE commentId = ? LIMIT 1", [commentId]);
+}
+
 function getListCommentsQuery(listId, page, sort) {
     return mysql.format(
         commentAttributes +
@@ -411,4 +415,5 @@ module.exports = {
     countSearchListsQuery,
     searchListsQuery,
     page,
+    getCommentListQuery
 };

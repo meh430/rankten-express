@@ -16,11 +16,6 @@ async function createComment(comment, userId, listId) {
 }
 
 async function updateComment(commentId, userId, comment) {
-    delete comment.commentId;
-    delete comment.userId;
-    delete comment.listId;
-    delete comment.dateCreated;
-
     const res = await sql.poolQuery(queries.updateCommentQuery(commentId, userId, comment));
     console.log(res);
 
@@ -56,4 +51,11 @@ async function getLikedComments(userId, page) {
     return utils.validatePage(await sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page))));
 }
 
-module.exports = { createComment, updateComment, deleteComment, getListComments, getUserComments, getLikedComments };
+async function getCommentList(commentId) {
+    const comment = await sql.poolQuery(queries.getCommentListQuery(commentId));
+    utils.checkIfFound(comment);
+
+    return comment[0].listId;
+}
+
+module.exports = { createComment, updateComment, deleteComment, getListComments, getUserComments, getLikedComments, getCommentList };
