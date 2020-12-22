@@ -40,7 +40,10 @@ async function updateRankedList(listId, userId, rankedList) {
         const listRes = await sql.query(connection, queries.updateRankedListQuery(rankedList, listId, userId));
         utils.checkRow(listRes);
 
-        const currentItemIds = await rankItemDao.getListRankItemIds(connection, listId);
+        const currentItemIds = utils.getOnePropArray(
+            await rankItemDao.getListRankItemIds(connection, listId),
+            "itemId"
+        );
         console.log(currentItemIds);
 
         const givenItemIds = utils.getOnePropArray(rankItems, "itemId");
@@ -159,7 +162,10 @@ async function getUserLists(userId, page, sort, all = false) {
 async function getFeed(userId) {
     const lastDay = Date.now() - 24 * 60 * 60 * 1000;
     const feedList = [];
-    const followingIds = await sql.poolQuery.query(queries.getFollowingIdsQuery(userId));
+    const followingIds = utils.getOnePropArray(
+        await sql.poolQuery.query(queries.getFollowingIdsQuery(userId)),
+        "followsId"
+    );
 
     await utils.asyncForEach(followingIds, async (id) => {
         feedList.push(await getRankedListPreviews(await sql.poolQuery(queries.getFeedQuery(id, lastDay))));

@@ -130,8 +130,28 @@ async function getFollowers(userId) {
     return followers;
 }
 
-async function likeUnlike(userId, targetId, query) {
-    await sql.query(query(userId, targetId));
+// targetId: thing being liked/unliked
+// idsQuery: query function that takes userId and returns list of liked ids
+// getLikedListIdsQuery or getLikedCommentIdsQuery
+// likeUnlikeQuery: query function that takes userId and targetId and likes/unlikes targetId
+// unlikeListQuery, likeListQuery, unlikeCommentQuery, likeCommentQuery
+// idsProperty: "commentId" or "listId" 
+async function likeUnlike(userId, targetId, idsQuery, likeUnlikeQuery, idProperty) {
+    const likedIds = utils.getOnePropArray(await sql.poolQuery(idsQuery(userId)), idProperty);
+
+    if (likedIds.includes(targetId)) {
+        const unliked = await sql.poolQuery(likeUnlikeQuery(userId, targetId));
+
+        utils.checkRow(unliked);
+
+        return "unliked";
+    } else {
+        const liked = await sql.poolQuery(likeUnlikeQuery(userId, targetId));
+
+        utils.checkRow(liked);
+
+        return "liked";
+    }
 }
 
 async function getListLikers(listId) {
