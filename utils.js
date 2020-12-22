@@ -5,15 +5,17 @@ const sortOptions = {
     oldest: "dateCreated ASC",
     likes: "numLikes DESC",
     points: "rankPoints DESC",
+
 };
 
-const [likes, newest, oldest] = [0, 1, 2];
+const [likes, newest, oldest, relevance] = [0, 1, 2, 3];
 
 function limitAndOffset(page, numItems = 10) {
     return [numItems, page * numItems];
 }
 
 function getSort(sort, user = false) {
+
     switch (sort) {
         case likes:
             return user ? sortOptions.points : sortOptions.likes;
@@ -21,8 +23,10 @@ function getSort(sort, user = false) {
             return sortOptions.newest;
         case oldest:
             return sortOptions.oldest;
+        case relevance:
+            return "";
         default:
-            throw "";
+            throw errors.badRequest();
     }
 }
 
