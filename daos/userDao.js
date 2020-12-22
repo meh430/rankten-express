@@ -71,7 +71,12 @@ async function getUser(userId, private) {
             sql.poolQuery(queries.getLikedCommentIdsQuery(userId)),
         ]);
 
-        return { ...userInfo, following, likedLists, likedComments };
+        return {
+            ...userInfo,
+            following: utils.getOnePropArray(following, "followsId"),
+            likedLists: utils.getOnePropArray(likedLists, "listId"),
+            likedComments: utils.getOnePropArray(likedComments, "commentId"),
+        };
     }
 
     return userInfo;
@@ -82,7 +87,7 @@ async function getUserWithName(username) {
 
     if (user.length) {
         return user[0];
-    } 
+    }
 
     return false;
 }
@@ -92,7 +97,7 @@ async function follow(userId, targetId) {
         throw errors.badRequest();
     }
 
-    const following = await sql.poolQuery(queries.getFollowingIdsQuery(userId));
+    const following = utils.getOnePropArray(await sql.poolQuery(queries.getFollowingIdsQuery(userId)), "followsId");
 
     if (following.includes(targetId)) {
         const unfollowed = await sql.poolQuery(queries.unfollowQuery(userId, targetId));
@@ -161,5 +166,5 @@ module.exports = {
     likeUnlike,
     getListLikers,
     searchUsers,
-    getAllUsers
+    getAllUsers,
 };
