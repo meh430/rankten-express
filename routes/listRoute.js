@@ -5,6 +5,14 @@ const parameters = require("../middleware/parameters");
 const rankedlistDao = require("../daos/rankedListDao");
 
 module.exports = (app) => {
+    app.get(
+        "/discover/:page/:sort",
+        [parameters.parseParameters],
+        errors.asyncError(async (req, res, next) => {
+            res.status(200).send(await rankedlistDao.getDiscoverLists(req.params.page, req.params.sort));
+        })
+    );
+
     // Returns a list
     app.get(
         "/rankedlist/:listId",
@@ -35,7 +43,7 @@ module.exports = (app) => {
             await rankedlistDao.createRankedList(req.user.userId, req.body);
             res.status(200).send("Created ranked list");
         })
-    );
+    );  
 
     // Updates a list, see POST for schema. NOTE: rankItem object may contain "itemId"
     app.put(

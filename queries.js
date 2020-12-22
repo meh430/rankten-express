@@ -86,12 +86,12 @@ const commentAttributes =
     "(SELECT COUNT(CommentLikes.userId) FROM CommentLikes WHERE" +
     "CommentLikes.commentId = Comments.commentId) AS numLikes ";
 
-function page(page) {
+function pager(page) {
     return " LIMIT " + page[0] + " OFFSET " + page[1];
 }
 
 function sortAndPage(page, sort) {
-    return " ORDER BY " + sort + page(page);
+    return " ORDER BY " + sort + pager(page);
 }
 
 function getCommentListQuery(commentId) {
@@ -194,7 +194,7 @@ function getLikedListsQuery(userId, page) {
         rankedListAttributes +
             "FROM ListLikes JOIN RankedLists ON ListLikes.listId = RankedLists.listId " +
             "JOIN Users ON RankedLists.userId = Users.userId WHERE ListLikes.userId = ?" +
-            page(page),
+            pager(page),
         [userId]
     );
 }
@@ -204,7 +204,7 @@ function getLikedCommentsQuery(userId, page) {
         commentAttributes +
             "FROM CommentLikes JOIN Comments ON CommentLikes.commentId = Comments.commentId " +
             "JOIN Users ON Comments.userId = Users.userId WHERE CommentLikes.userId = ?" +
-            page(page),
+            pager(page),
         [userId]
     );
 }
@@ -249,7 +249,7 @@ function deleteListRankItemsQuery(listId) {
 function getCommentPreview(listId) {
     return mysql.format(
         "SELECT Comments.comment, Comments.dateCreated, Users.username, " +
-            "Users.profilePic, FROM Comments JOIN Users ON " +
+            "Users.profilePic FROM Comments JOIN Users ON " +
             "Comments.userId = Users.userId WHERE Comments.listId = ? LIMIT 1",
         [listId]
     );
@@ -317,7 +317,7 @@ function searchUsersQuery(query, page, sort) {
             mysql.format(
                 "FROM Users WHERE MATCH(Users.username, Users.bio) " +
                     "AGAINST(? IN NATURAL LANGUAGE MODE)" +
-                    page(page),
+                    pager(page),
                 [query]
             )
         );
@@ -357,7 +357,7 @@ function searchListsQuery(query, page, sort) {
             "FROM (" +
             searchRankItemsQuery(query) +
             ") AS search JOIN RankedLists ON search.lId = RankedLists.listId" +
-            page(page)
+            pager(page)
         );
     }
 }
@@ -414,6 +414,6 @@ module.exports = {
     searchRankItemsQuery,
     countSearchListsQuery,
     searchListsQuery,
-    page,
+    pager,
     getCommentListQuery,
 };

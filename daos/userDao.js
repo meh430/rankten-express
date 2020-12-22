@@ -22,7 +22,6 @@ async function createUser(user) {
     user.password = bcrypt.hashSync(user.password);
 
     const res = await sql.poolQuery(queries.createUserQuery(user));
-    console.log(res);
     return res.insertId;
 }
 
@@ -41,7 +40,6 @@ async function updateUser(userId, user) {
     }
 
     const res = await sql.poolQuery(queries.updateUserQuery(userId, user));
-    console.log(res);
 
     utils.checkRow(res);
 }
@@ -49,7 +47,6 @@ async function updateUser(userId, user) {
 async function deleteUser(userId) {
     sql.performTransaction(async (connection) => {
         const res = await sql.query(connection, queries.deleteUserQuery(userId));
-        console.log(res);
 
         utils.checkRow(res);
 
@@ -59,7 +56,6 @@ async function deleteUser(userId) {
 
 async function getUser(userId, private) {
     let userInfo = await sql.poolQuery(queries.getUserQuery(userId));
-    console.log(userInfo);
 
     utils.checkIfFound(userInfo);
     userInfo = userInfo[0];
@@ -101,14 +97,12 @@ async function follow(userId, targetId) {
 
     if (following.includes(targetId)) {
         const unfollowed = await sql.poolQuery(queries.unfollowQuery(userId, targetId));
-        console.log(unfollowed);
 
         utils.checkRow(unfollowed);
 
         return "unfollowed user";
     } else {
         const followed = await sql.poolQuery(queries.followQuery(userId, targetId));
-        console.log(followed);
 
         utils.checkRow(followed);
 
@@ -118,14 +112,12 @@ async function follow(userId, targetId) {
 
 async function getFollowing(userId) {
     const following = await sql.poolQuery(queries.getFollowingQuery(userId));
-    console.log(following);
 
     return following;
 }
 
 async function getFollowers(userId) {
     const followers = await sql.poolQuery(queries.getFollowersQuery(userId));
-    console.log(followers);
 
     return followers;
 }
@@ -156,7 +148,6 @@ async function likeUnlike(userId, targetId, idsQuery, likeQuery, unlikeQuery, id
 
 async function getListLikers(listId) {
     const likers = await sql.poolQuery(queries.getListLikersQuery(listId));
-    console.log(likers);
 
     return likers;
 }
@@ -165,7 +156,6 @@ async function searchUsers(query, page, sort) {
     const users = await sql.poolQuery(
         queries.searchUsersQuery(query, utils.limitAndOffset(page, 100), utils.getSort(sort, true))
     );
-    console.log(users);
 
     return utils.validatePage(users);
 }

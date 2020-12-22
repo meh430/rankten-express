@@ -44,8 +44,7 @@ async function updateRankedList(listId, userId, rankedList) {
             await rankItemDao.getListRankItemIds(connection, listId),
             "itemId"
         );
-        console.log(currentItemIds);
-
+        
         const givenItemIds = utils.getOnePropArray(rankItems, "itemId");
 
         await utils.asyncForEach(currentItemIds, async (id) => {
@@ -80,7 +79,8 @@ async function deleteRankedList(listId, userId) {
 
 async function getRankedList(listId) {
     const [rankedList, rankItems] = await Promise.all([
-        sql.poolQuery(queries.getRankedListQuery(listId), sql.poolQuery(queries.getRankItemsQuery(listId))),
+        sql.poolQuery(queries.getRankedListQuery(listId)),
+        sql.poolQuery(queries.getRankItemsQuery(listId)),
     ]);
 
     utils.checkIfFound(rankedList);
@@ -100,7 +100,7 @@ async function getPreviewItem(rankedList) {
 
     for (let i = 0; i < rankItems.length; i++) {
         if (i < 3) {
-            items.push({ itemName: rankItems[i].itemName, rank: rankItems[i].rank });
+            items.push({ itemName: rankItems[i].itemName, ranking: rankItems[i].ranking });
         } else if (picture) {
             break;
         }
@@ -111,7 +111,7 @@ async function getPreviewItem(rankedList) {
     }
 
     currentPreview.rankItems = items;
-    currentPreview.numItems = numItems;
+    currentPreview.numItems = rankItems.length;
     currentPreview.picture = picture;
 
     const commentPreview = await sql.poolQuery(queries.getCommentPreview(listId));
@@ -134,10 +134,8 @@ async function getDiscoverLists(page, sort) {
     const discoverLists = await sql.poolQuery(
         queries.getDiscoverQuery(utils.limitAndOffset(page), utils.getSort(sort))
     );
-    console.log(discoverLists);
 
     const discoverPreviews = await getRankedListPreviews(discoverLists);
-    console.log(discoverPreviews);
     return utils.validatePage(discoverPreviews);
 }
 

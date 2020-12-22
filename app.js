@@ -20,7 +20,6 @@ async function init() {
         await sql.query(connection, "CREATE DATABASE IF NOT EXISTS rank_ten");
         await sql.query(connection, "USE rank_ten");
         await models.initializeTables(connection);
-        console.log(await sql.query(connection, "SHOW TABLES"));
 
         connection.release();
 
