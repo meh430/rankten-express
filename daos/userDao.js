@@ -136,17 +136,17 @@ async function getFollowers(userId) {
 // likeUnlikeQuery: query function that takes userId and targetId and likes/unlikes targetId
 // unlikeListQuery, likeListQuery, unlikeCommentQuery, likeCommentQuery
 // idsProperty: "commentId" or "listId" 
-async function likeUnlike(userId, targetId, idsQuery, likeUnlikeQuery, idProperty) {
+async function likeUnlike(userId, targetId, idsQuery, likeQuery, unlikeQuery, idProperty) {
     const likedIds = utils.getOnePropArray(await sql.poolQuery(idsQuery(userId)), idProperty);
 
     if (likedIds.includes(targetId)) {
-        const unliked = await sql.poolQuery(likeUnlikeQuery(userId, targetId));
+        const unliked = await sql.poolQuery(unlikeQuery(userId, targetId));
 
         utils.checkRow(unliked);
 
         return "unliked";
     } else {
-        const liked = await sql.poolQuery(likeUnlikeQuery(userId, targetId));
+        const liked = await sql.poolQuery(likeQuery(userId, targetId));
 
         utils.checkRow(liked);
 

@@ -7,6 +7,7 @@ const rankedlistDao = require("../daos/rankedListDao");
 module.exports = (app) => {
     app.get(
         "/rankedlist/:listId",
+        [parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await rankedlistDao.getRankedList(req.params.listId));
         })
@@ -14,7 +15,7 @@ module.exports = (app) => {
 
     app.put(
         "/rankedlist/:listId",
-        [expressJwt(jwtSecret)],
+        [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await rankedlistDao.updateRankedList(req.params.listId, req.user.userId, req.body);
             res.status(200).send("Updated ranked list");
@@ -23,7 +24,7 @@ module.exports = (app) => {
 
     app.delete(
         "/rankedlist/:listId",
-        [expressJwt(jwtSecret)],
+        [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await rankedlistDao.deleteRankedList(req.params.listId, req.user.userId);
             res.status(200).send("Deleted ranked list");
@@ -32,7 +33,7 @@ module.exports = (app) => {
 
     app.post(
         "/rankedlist",
-        [expressJwt(jwtSecret)],
+        [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await rankedlistDao.createRankedList(req.user.userId, req.body);
             res.status(200).send("Created ranked list");
@@ -41,6 +42,7 @@ module.exports = (app) => {
 
     app.get(
         "/rankedlists/:userId/:page/:sort",
+        [parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(
                 await rankedlistDao.getUserLists(req.params.userId, req.params.page, req.params.sort, false)
@@ -50,7 +52,7 @@ module.exports = (app) => {
 
     app.get(
         "/rankedlistsp/:page/:sort",
-        [expressJwt(jwtSecret)],
+        [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(
                 await rankedlistDao.getUserLists(req.user.userId, req.params.page, req.params.sort, true)
@@ -60,7 +62,7 @@ module.exports = (app) => {
 
     app.get(
         "/feed/:page",
-        [expressJwt(jwtSecret)],
+        [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             const feed = await rankedlistDao.getFeed(req.user.userId);
             res.status(200).send(feed.slice(req.params.page * 10, req.params.page * 10 + 10));
