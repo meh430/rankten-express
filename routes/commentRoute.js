@@ -6,6 +6,7 @@ const rankedlistDao = require("../daos/rankedListDao");
 const commentDao = require("../daos/commentDao");
 
 module.exports = (app) => {
+    // Returns the list a specified comment belongs to
     app.get(
         "/comment/:commentId",
         [parameters.parseParameters],
@@ -16,6 +17,9 @@ module.exports = (app) => {
         })
     );
 
+    /* Creates new comment
+    body schema: {comment: string}
+    */
     app.post(
         "/comment/:listId",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -25,6 +29,9 @@ module.exports = (app) => {
         })
     );
 
+    /* Updates comment
+    body schema: {comment: string}
+    */
     app.put(
         "/comment/:commentId",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -34,6 +41,7 @@ module.exports = (app) => {
         })
     );
 
+    // Deletes comment
     app.delete(
         "/comment/:commentId",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -43,6 +51,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns all comments on a list
     app.get(
         "/comments/:listId/:page/:sort",
         [parameters.parseParameters],
@@ -51,6 +60,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns all comments made by user
     app.get(
         "/user_comments/:page/:sort",
         [expressJwt(jwtSecret), parameters.parseParameters],

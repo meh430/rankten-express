@@ -8,6 +8,7 @@ const userDao = require("../daos/userDao");
 const queries = require("../queries");
 
 module.exports = (app) => {
+    // Likes or unlikes list
     app.post(
         "/like/:listId",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -25,6 +26,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns all users that liked a list
     app.get(
         "/like/:listId",
         [parameters.parseParameters],
@@ -33,6 +35,7 @@ module.exports = (app) => {
         })
     );
 
+    // Likes or unlikes a comment
     app.post(
         "/like_comment/:commentId",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -50,6 +53,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns all comments liked by user
     app.get(
         "/liked_comments/:page",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -58,6 +62,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns all lists liked by user
     app.get(
         "/likes/:page",
         [expressJwt(jwtSecret), parameters.parseParameters],

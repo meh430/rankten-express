@@ -5,6 +5,13 @@ const parameters = require("../middleware/parameters");
 const userDao = require("../daos/userDao");
 
 module.exports = (app) => {
+    /* Updates user
+    body schema: {
+        password: string,
+        bio: string,
+        profilePic: string
+    }
+    */
     app.put(
         "/users",
         [expressJwt(jwtSecret)],
@@ -14,6 +21,7 @@ module.exports = (app) => {
         })
     );
 
+    // Deletes user
     app.delete(
         "/users",
         [expressJwt(jwtSecret)],
@@ -23,6 +31,7 @@ module.exports = (app) => {
         })
     );
 
+    // Gets user info
     app.get(
         "/users/:userId",
         [parameters.parseParameters],

@@ -5,6 +5,7 @@ const parameters = require("../middleware/parameters");
 const rankedlistDao = require("../daos/rankedListDao");
 
 module.exports = (app) => {
+    // Returns a list
     app.get(
         "/rankedlist/:listId",
         [parameters.parseParameters],
@@ -13,24 +14,20 @@ module.exports = (app) => {
         })
     );
 
-    app.put(
-        "/rankedlist/:listId",
-        [expressJwt(jwtSecret), parameters.parseParameters],
-        errors.asyncError(async (req, res, next) => {
-            await rankedlistDao.updateRankedList(req.params.listId, req.user.userId, req.body);
-            res.status(200).send("Updated ranked list");
-        })
-    );
-
-    app.delete(
-        "/rankedlist/:listId",
-        [expressJwt(jwtSecret), parameters.parseParameters],
-        errors.asyncError(async (req, res, next) => {
-            await rankedlistDao.deleteRankedList(req.params.listId, req.user.userId);
-            res.status(200).send("Deleted ranked list");
-        })
-    );
-
+    /* Creates a list
+    body schema: {
+        title: string,
+        private: bool,
+        rankItems: [
+            {
+                ranking: int,
+                itemName: string,
+                description: string,
+                picture: string
+            }
+        ]
+    }
+    */
     app.post(
         "/rankedlist",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -40,6 +37,27 @@ module.exports = (app) => {
         })
     );
 
+    // Updates a list, see POST for schema. NOTE: rankItem object may contain "itemId"
+    app.put(
+        "/rankedlist/:listId",
+        [expressJwt(jwtSecret), parameters.parseParameters],
+        errors.asyncError(async (req, res, next) => {
+            await rankedlistDao.updateRankedList(req.params.listId, req.user.userId, req.body);
+            res.status(200).send("Updated ranked list");
+        })
+    );
+
+    // Deletes a list
+    app.delete(
+        "/rankedlist/:listId",
+        [expressJwt(jwtSecret), parameters.parseParameters],
+        errors.asyncError(async (req, res, next) => {
+            await rankedlistDao.deleteRankedList(req.params.listId, req.user.userId);
+            res.status(200).send("Deleted ranked list");
+        })
+    );
+
+    // Returns lists created by a user
     app.get(
         "/rankedlists/:userId/:page/:sort",
         [parameters.parseParameters],
@@ -50,6 +68,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns lists created by user, including private
     app.get(
         "/rankedlistsp/:page/:sort",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -60,6 +79,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns user feed
     app.get(
         "/feed/:page",
         [expressJwt(jwtSecret), parameters.parseParameters],

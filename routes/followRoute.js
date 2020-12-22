@@ -5,6 +5,7 @@ const parameters = require("../middleware/parameters");
 const userDao = require("../daos/userDao");
 
 module.exports = (app) => {
+    // Follows or unfollows user
     app.post(
         "/follow/:userId",
         [expressJwt(jwtSecret), parameters.parseParameters],
@@ -15,6 +16,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns everyone a user is following
     app.get(
         "/following/:userId",
         [parameters.parseParameters],
@@ -23,6 +25,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns the followers of a user
     app.get(
         "/followers/:userId",
         [parameters.parseParameters],

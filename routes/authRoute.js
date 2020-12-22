@@ -8,6 +8,9 @@ const userDao = require("../daos/userDao");
 const tokenExpiry = { expiresIn: 7 * 24 * 60 * 60 };
 
 module.exports = (app) => {
+    /* Creates new user and returns info along with jwt
+    body schema: {username: string, password: string, bio: string}
+    */
     app.post(
         "/signup",
         errors.asyncError(async (req, res, next) => {
@@ -26,6 +29,9 @@ module.exports = (app) => {
         })
     );
 
+    /* Returns specified user along with jwt
+    body schema: {username: string, password: string}
+    */
     app.post(
         "/login",
         errors.asyncError(async (req, res, next) => {
@@ -47,6 +53,7 @@ module.exports = (app) => {
         })
     );
 
+    // Returns user info corresponding to given jwt
     app.post(
         "/validate_token",
         [expressJwt(jwtSecret)],
