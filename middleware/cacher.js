@@ -57,7 +57,7 @@ function cacheSent(res, keyName, ex) {
     const send = res.send;
     res.send = (body) => {
         //console.log(body);
-        redisCache.set(keyName, JSON.stringify(body), ex);
+        redisCache.set(keyName, JSON.stringify(body), ex).catch(console.log);
         res.send = send;
         res.send(body);
     };

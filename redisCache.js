@@ -16,7 +16,6 @@ function checkConnection(reject) {
 }
 
 function inPromise(resolve, reject, error, res) {
-
     if (error) {
         reject(error);
     }
@@ -35,7 +34,7 @@ function set(key, value, ex = 3600) {
 
 function get(key) {
     return new Promise((resolve, reject) => {
-            checkConnection(reject);
+        checkConnection(reject);
 
         client.get(key, (error, res) => {
             inPromise(resolve, reject, error, res);
@@ -45,7 +44,7 @@ function get(key) {
 
 function del(key) {
     return new Promise((resolve, reject) => {
-                checkConnection(reject);
+        checkConnection(reject);
 
         client.del(key, (error, res) => {
             inPromise(resolve, reject, error, res);
@@ -75,6 +74,5 @@ function bulkDelete(key, cursor = "0") {
         return bulkDelete(key, cursor);
     });
 }
-
 
 module.exports = { set, get, del, bulkDelete };
