@@ -60,8 +60,12 @@ module.exports = (app) => {
         "/liked_comments/:page",
         [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
-            const [comments, itemCount] = await commentDao.getLikedComments(req.user.userId, req.params.page);
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, comments));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await commentDao.getLikedComments(req.user.userId, req.params.page)),
+                    req.params.page
+                )
+            );
         })
     );
 
@@ -70,8 +74,12 @@ module.exports = (app) => {
         "/likes/:page",
         [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
-            const [lists, itemCount] = await rankedlistDao.getLikedLists(req.user.userId, req.params.page)
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await rankedlistDao.getLikedLists(req.user.userId, req.params.page)),
+                    req.params.page
+                )
+            );
         })
     );
 };

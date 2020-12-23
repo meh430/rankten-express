@@ -59,7 +59,7 @@ async function asyncForEach(arr, callback) {
 
 const hoursToSec = hours => hours * 60 * 60;
 
-function getPagingInfo(page, itemLimit, itemCount, items) {
+function getPagingInfo(items, itemCount, page, itemLimit=10) {
     const lastPage = itemCount ? Math.ceil(itemCount / itemLimit) - 1 : 0;
     if (page > lastPage) {
         throw errors.invalidPage();

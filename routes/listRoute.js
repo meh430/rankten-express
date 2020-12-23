@@ -13,8 +13,12 @@ module.exports = (app) => {
         "/discover/:page/:sort",
         [parameters.parseParameters, cacher(2, utils.hoursToSec(2))],
         errors.asyncError(async (req, res, next) => {
-            const [lists, itemCount] = await rankedlistDao.getDiscoverLists(req.params.page, req.params.sort);
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await rankedlistDao.getDiscoverLists(req.params.page, req.params.sort)),
+                    req.params.page
+                )
+            );
         })
     );
 
@@ -75,13 +79,12 @@ module.exports = (app) => {
         "/rankedlists/:userId/:page/:sort",
         [parameters.parseParameters, cacher(3, utils.hoursToSec(1))],
         errors.asyncError(async (req, res, next) => {
-            const [lists, itemCount] = await rankedlistDao.getUserLists(
-                req.params.userId,
-                req.params.page,
-                req.params.sort,
-                false
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await rankedlistDao.getUserLists(req.params.userId, req.params.page, req.params.sort, false)),
+                    req.params.page
+                )
             );
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
         })
     );
 
@@ -90,13 +93,12 @@ module.exports = (app) => {
         "/rankedlistsp/:page/:sort",
         [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
-            const [lists, itemCount] = await rankedlistDao.getUserLists(
-                req.user.userId,
-                req.params.page,
-                req.params.sort,
-                true
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await rankedlistDao.getUserLists(req.user.userId, req.params.page, req.params.sort, true)),
+                    req.params.page
+                )
             );
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
         })
     );
 
@@ -112,10 +114,9 @@ module.exports = (app) => {
                 const parsedCache = JSON.parse(cachedFeed);
                 res.status(200).send(
                     utils.getPagingInfo(
-                        req.params.page,
-                        10,
+                        parsedCache.slice(req.params.page * 10, req.params.page * 10 + 10),
                         parsedCache.length,
-                        parsedCache.slice(req.params.page * 10, req.params.page * 10 + 10)
+                        req.params.page
                     )
                 );
             } else {
@@ -123,10 +124,9 @@ module.exports = (app) => {
                 await redisCache.set(keyName, JSON.stringify(feed), utils.hoursToSec(2));
                 res.status(200).send(
                     utils.getPagingInfo(
-                        req.params.page,
-                        10,
+                        feed.slice(req.params.page * 10, req.params.page * 10 + 10),
                         feed.length,
-                        feed.slice(req.params.page * 10, req.params.page * 10 + 10)
+                        req.params.page
                     )
                 );
             }

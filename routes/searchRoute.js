@@ -11,8 +11,13 @@ module.exports = (app) => {
         [parameters.parseParameters, cacher(2, utils.hoursToSec(12))],
         errors.asyncError(async (req, res, next) => {
             const query = getQuery(req);
-            const [users, itemCount] = await userDao.searchUsers(query, req.params.page, req.params.sort);
-            res.status(200).send(utils.getPagingInfo(req.params.page, 100, itemCount, users));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await userDao.searchUsers(query, req.params.page, req.params.sort)),
+                    req.params.page,
+                    100
+                )
+            );
         })
     );
 
@@ -21,8 +26,12 @@ module.exports = (app) => {
         [parameters.parseParameters, cacher(2, utils.hoursToSec(12))],
         errors.asyncError(async (req, res, next) => {
             const query = getQuery(req);
-            const [lists, itemCount] = await rankedlistDao.searchLists(query, req.params.page, req.params.sort);
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await rankedlistDao.searchLists(query, req.params.page, req.params.sort)),
+                    req.params.page
+                )
+            );
         })
     );
 };

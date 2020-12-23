@@ -58,8 +58,12 @@ module.exports = (app) => {
         "/comments/:listId/:page/:sort",
         [parameters.parseParameters, cacher(3, utils.hoursToSec(2))],
         errors.asyncError(async (req, res, next) => {
-            const [comments, itemCount] = await commentDao.getListComments(req.params.listId, req.params.page, req.params.sort);
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, comments));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await commentDao.getListComments(req.params.listId, req.params.page, req.params.sort)),
+                    req.params.page
+                )
+            );
         })
     );
 
@@ -68,8 +72,12 @@ module.exports = (app) => {
         "/user_comments/:page/:sort",
         [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
-            const [comments, itemCount] = await commentDao.getUserComments(req.user.userId, req.params.page, req.params.sort);
-            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, comments));
+            res.status(200).send(
+                utils.getPagingInfo(
+                    ...(await commentDao.getUserComments(req.user.userId, req.params.page, req.params.sort)),
+                    req.params.page
+                )
+            );
         })
     );
 };
