@@ -23,27 +23,34 @@ async function updateComment(commentId, userId, comment) {
 async function deleteComment(commentId, userId) {
     const res = await sql.poolQuery(queries.deleteCommentQuery(commentId, userId));
 
-    utils.checkRow();
+    utils.checkRow(res);
 }
 
 async function getListComments(listId, page, sort) {
-    const comments = await sql.poolQuery(
-        queries.getListCommentsQuery(listId, utils.limitAndOffset(page), utils.getSort(sort))
-    );
+    const [comments, itemCount] = await Promise.all([
+        sql.poolQuery(queries.getListCommentsQuery(listId, utils.limitAndOffset(page), utils.getSort(sort))),
+        sql.poolQuery(queries.countListCommentsQuery(listId)),
+    ]);
 
-    return utils.validatePage(comments);
+    return [comments, itemCount[0].itemCount];
 }
 
 async function getUserComments(userId, page, sort) {
-    const comments = await sql.poolQuery(
-        queries.getUserCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))
-    );
+    const [comments, itemCount] = await Promise.all([
+        sql.poolQuery(queries.getUserCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))),
+        sql.poolQuery(queries.countUserCommentsQuery(userId)),
+    ]);
 
-    return utils.validatePage(comments);
+    return [comments, itemCount[0].itemCount];
 }
 
 async function getLikedComments(userId, page) {
-    return utils.validatePage(await sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page))));
+    const [comments, itemCount] = await Promise.all([
+        sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page))),
+        sql.poolQuery(queries.countLikedCommentsQuery(userId)),
+    ]);
+    
+    return [comments, itemCount[0].itemCount];
 }
 
 async function getCommentList(commentId) {

@@ -17,7 +17,7 @@ const createRankedListsTable =
     "userId int NOT NULL," +
     "dateCreated bigint NOT NULL," +
     "title varchar(50) NOT NULL," +
-    "private bool DEFAULT false," +
+    "private bool NOT NULL DEFAULT 0," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
     "FULLTEXT KEY (title))";
 
@@ -26,7 +26,7 @@ const createRankItemsTable =
     "itemId int NOT NULL PRIMARY KEY AUTO_INCREMENT," +
     "listId int NOT NULL," +
     "listTitle varchar(50) NOT NULL," +
-    "private bool DEFAULT false," +
+    "private bool NOT NULL DEFAULT 0," +
     "ranking int NOT NULL," +
     "itemName varchar(50) NOT NULL," +
     "description TEXT," +

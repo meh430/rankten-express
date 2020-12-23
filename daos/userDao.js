@@ -153,11 +153,12 @@ async function getListLikers(listId) {
 }
 
 async function searchUsers(query, page, sort) {
-    const users = await sql.poolQuery(
-        queries.searchUsersQuery(query, utils.limitAndOffset(page, 100), utils.getSort(sort, true))
-    );
+    const [users, itemCount] = await Promise.all([
+        sql.poolQuery(queries.searchUsersQuery(query, utils.limitAndOffset(page, 100), utils.getSort(sort, true))),
+        sql.poolQuery(queries.countSearchUsersQuery(query)),
+    ]);
 
-    return utils.validatePage(users);
+    return [users, itemCount[0].itemCount];
 }
 
 async function getAllUsers() {

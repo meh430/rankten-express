@@ -6,13 +6,15 @@ const rankedlistDao = require("../daos/rankedListDao");
 const redisCache = require("../redisCache");
 const cacher = require("../middleware/cacher");
 const utils = require("../utils");
+const sql = require("../sqlPromise");
 
 module.exports = (app) => {
     app.get(
         "/discover/:page/:sort",
         [parameters.parseParameters, cacher(2, utils.hoursToSec(2))],
         errors.asyncError(async (req, res, next) => {
-            res.status(200).send(await rankedlistDao.getDiscoverLists(req.params.page, req.params.sort));
+            const [lists, itemCount] = await rankedlistDao.getDiscoverLists(req.params.page, req.params.sort);
+            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
         })
     );
 
@@ -73,9 +75,13 @@ module.exports = (app) => {
         "/rankedlists/:userId/:page/:sort",
         [parameters.parseParameters, cacher(3, utils.hoursToSec(1))],
         errors.asyncError(async (req, res, next) => {
-            res.status(200).send(
-                await rankedlistDao.getUserLists(req.params.userId, req.params.page, req.params.sort, false)
+            const [lists, itemCount] = await rankedlistDao.getUserLists(
+                req.params.userId,
+                req.params.page,
+                req.params.sort,
+                false
             );
+            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
         })
     );
 
@@ -84,9 +90,13 @@ module.exports = (app) => {
         "/rankedlistsp/:page/:sort",
         [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
         errors.asyncError(async (req, res, next) => {
-            res.status(200).send(
-                await rankedlistDao.getUserLists(req.user.userId, req.params.page, req.params.sort, true)
+            const [lists, itemCount] = await rankedlistDao.getUserLists(
+                req.user.userId,
+                req.params.page,
+                req.params.sort,
+                true
             );
+            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
         })
     );
 
@@ -99,11 +109,26 @@ module.exports = (app) => {
             const cachedFeed = await redisCache.get(keyName);
 
             if (!req.query.re && cachedFeed) {
-                res.status(200).send(JSON.parse(cachedFeed).slice(req.params.page * 10, req.params.page * 10 + 10));
+                const parsedCache = JSON.parse(cachedFeed);
+                res.status(200).send(
+                    utils.getPagingInfo(
+                        req.params.page,
+                        10,
+                        parsedCache.length,
+                        parsedCache.slice(req.params.page * 10, req.params.page * 10 + 10)
+                    )
+                );
             } else {
                 const feed = await rankedlistDao.getFeed(req.user.userId);
                 await redisCache.set(keyName, JSON.stringify(feed), utils.hoursToSec(2));
-                res.status(200).send(feed.slice(req.params.page * 10, req.params.page * 10 + 10));
+                res.status(200).send(
+                    utils.getPagingInfo(
+                        req.params.page,
+                        10,
+                        feed.length,
+                        feed.slice(req.params.page * 10, req.params.page * 10 + 10)
+                    )
+                );
             }
         })
     );

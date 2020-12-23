@@ -1,4 +1,5 @@
 const errors = require("./middleware/errorHandler");
+const sql = require("./sqlPromise");
 
 const sortOptions = {
     newest: "dateCreated DESC",
@@ -7,7 +8,7 @@ const sortOptions = {
     points: "rankPoints DESC",
 };
 
-const [likes, newest, oldest, relevance] = [0, 1, 2, 3];
+const [likes, newest, oldest] = [0, 1, 2];
 
 function limitAndOffset(page, numItems = 10) {
     return [numItems, page * numItems];
@@ -21,8 +22,6 @@ function getSort(sort, user = false) {
             return sortOptions.newest;
         case oldest:
             return sortOptions.oldest;
-        case relevance:
-            return "";
         default:
             throw errors.badRequest();
     }
@@ -60,4 +59,13 @@ async function asyncForEach(arr, callback) {
 
 const hoursToSec = hours => hours * 60 * 60;
 
-module.exports = { limitAndOffset, getSort, validatePage, checkRow, checkIfFound, getOnePropArray, asyncForEach, hoursToSec };
+function getPagingInfo(page, itemLimit, itemCount, items) {
+    const lastPage = itemCount ? Math.ceil(itemCount / itemLimit) - 1 : 0;
+    if (page > lastPage) {
+        throw errors.invalidPage();
+    }
+
+    return { lastPage, items };
+}
+
+module.exports = { limitAndOffset, getSort, validatePage, checkRow, checkIfFound, getOnePropArray, asyncForEach, hoursToSec, getPagingInfo };

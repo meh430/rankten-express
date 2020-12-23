@@ -2,23 +2,27 @@ const errors = require("../middleware/errorHandler");
 const parameters = require("../middleware/parameters");
 const rankedlistDao = require("../daos/rankedListDao");
 const userDao = require("../daos/userDao");
+const cacher = require("../middleware/cacher");
+const utils = require("../utils");
 
 module.exports = (app) => {
     app.get(
         "/search_users/:page/:sort",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(2, utils.hoursToSec(12))],
         errors.asyncError(async (req, res, next) => {
             const query = getQuery(req);
-            res.status(200).send(await userDao.searchUsers(query, req.params.page, req.params.sort));
+            const [users, itemCount] = await userDao.searchUsers(query, req.params.page, req.params.sort);
+            res.status(200).send(utils.getPagingInfo(req.params.page, 100, itemCount, users));
         })
     );
 
     app.get(
         "/search_lists/:page/:sort",
-        [parameters.parseParameters],
+        [parameters.parseParameters, cacher(2, utils.hoursToSec(12))],
         errors.asyncError(async (req, res, next) => {
             const query = getQuery(req);
-            res.status(200).send(await rankedlistDao.searchLists(query, req.params.page, req.params.sort));
+            const [lists, itemCount] = await rankedlistDao.searchLists(query, req.params.page, req.params.sort);
+            res.status(200).send(utils.getPagingInfo(req.params.page, 10, itemCount, lists));
         })
     );
 };
@@ -29,5 +33,5 @@ function getQuery(req) {
         throw errors.badRequest();
     }
 
-    return query;
+    return query.replace(/\+/g, " ");
 }
