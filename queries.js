@@ -83,7 +83,7 @@ function deleteCommentQuery(commentId, userId) {
 
 const commentAttributes =
     "SELECT Comments.*, Users.username, Users.profilePic, " +
-    "(SELECT COUNT(CommentLikes.userId) FROM CommentLikes WHERE" +
+    "(SELECT COUNT(CommentLikes.userId) FROM CommentLikes WHERE " +
     "CommentLikes.commentId = Comments.commentId) AS numLikes ";
 
 function pager(page) {

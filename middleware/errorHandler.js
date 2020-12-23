@@ -50,7 +50,6 @@ module.exports = {
     errorHandler,
     authError,
     notFoundError,
-    invalidCredentialsError,
     badRequest,
     invalidPage,
     connectionLost,

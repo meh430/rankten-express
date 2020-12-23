@@ -24,7 +24,7 @@ module.exports = (app) => {
                 "listId"
             );
 
-            res.status(200).send(result + " list");
+            res.status(200).send({ message: result + " list" });
         })
     );
 
@@ -51,7 +51,7 @@ module.exports = (app) => {
                 "commentId"
             );
 
-            res.status(200).send(result + " comment");
+            res.status(200).send({ message: result + " comment" });
         })
     );
 

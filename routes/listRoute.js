@@ -44,7 +44,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await rankedlistDao.createRankedList(req.user.userId, req.body);
-            res.status(200).send("Created ranked list");
+            res.status(200).send({ message: "Created ranked list" });
         })
     );
 
@@ -54,7 +54,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await rankedlistDao.updateRankedList(req.params.listId, req.user.userId, req.body);
-            res.status(200).send("Updated ranked list");
+            res.status(200).send({ message: "Updated ranked list" });
         })
     );
 
@@ -64,7 +64,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await rankedlistDao.deleteRankedList(req.params.listId, req.user.userId);
-            res.status(200).send("Deleted ranked list");
+            res.status(200).send({ message: "Deleted ranked list" });
         })
     );
 

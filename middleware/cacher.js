@@ -12,7 +12,7 @@ function getRouteCacher(slashSplit, ex = 3600, private = false) {
             if (req.query.re) {
                 const numDeleted = await redisCache.del(baseName + "*");
                 console.log(numDeleted);
-                cacheSent(res, ex);
+                cacheSent(res, keyName, ex);
                 return next();
             }
 
@@ -20,9 +20,9 @@ function getRouteCacher(slashSplit, ex = 3600, private = false) {
 
             if (cachedValue) {
                 console.log("FROM CACHE :)");
-                res.status(200).send(JSON.parse(cachedValue));
+                return res.status(200).send(JSON.parse(cachedValue));
             } else {
-                cacheSent(res, ex);
+                cacheSent(res, keyName, ex);
             }
 
             next();
@@ -34,13 +34,12 @@ function getRouteCacher(slashSplit, ex = 3600, private = false) {
     return routeCacher;
 }
 
-function cacheSent(res, ex) {
+function cacheSent(res, keyName, ex) {
     console.log("CACHING...");
     const send = res.send;
     res.send = (body) => {
         redisCache
             .set(keyName, JSON.stringify(body), ex)
-            .then((result) => console.log(result))
             .catch((error) => next());
         res.send = send;
         res.send(body);

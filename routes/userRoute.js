@@ -17,7 +17,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret)],
         errors.asyncError(async (req, res, next) => {
             await userDao.updateUser(req.user.userId, req.body);
-            res.status(200).send("Updated user");
+            res.status(200).send({ message: "Updated user" });
         })
     );
 
@@ -27,7 +27,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret)],
         errors.asyncError(async (req, res, next) => {
             await userDao.deleteUser(req.user.userId);
-            res.status(200).send("Deleted user");
+            res.status(200).send({ message: "Deleted user" });
         })
     );
 

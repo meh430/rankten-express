@@ -26,8 +26,8 @@ module.exports = (app) => {
         "/comment/:listId",
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
-            await commentDao.createComment(req.body.comment, req.user.userId, req.params.listId);
-            res.status(200).send("Created comment");
+            await commentDao.createComment(req.body, req.user.userId, req.params.listId);
+            res.status(200).send({ message: "Created comment" });
         })
     );
 
@@ -39,7 +39,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await commentDao.updateComment(req.params.commentId, req.user.userId, req.body.comment);
-            res.status(200).send("Updated comment");
+            res.status(200).send({ message: "Updated comment" });
         })
     );
 
@@ -49,7 +49,7 @@ module.exports = (app) => {
         [expressJwt(jwtSecret), parameters.parseParameters],
         errors.asyncError(async (req, res, next) => {
             await commentDao.deleteComment(req.params.commentId, req.user.userId);
-            res.status(200).send("Deleted comment");
+            res.status(200).send({ message: "Deleted comment" });
         })
     );
 
