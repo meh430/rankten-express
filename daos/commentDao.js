@@ -44,9 +44,9 @@ async function getUserComments(userId, page, sort) {
     return [comments, itemCount[0].itemCount];
 }
 
-async function getLikedComments(userId, page) {
+async function getLikedComments(userId, page, sort) {
     const [comments, itemCount] = await Promise.all([
-        sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page))),
+        sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))),
         sql.poolQuery(queries.countLikedCommentsQuery(userId)),
     ]);
     

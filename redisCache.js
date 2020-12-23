@@ -3,7 +3,7 @@ const redis = require("redis");
 const client = redis.createClient(redisConfig);
 
 client.on("error", (error) => {
-  console.error(error);
+    console.error(error);
 });
 
 function inPromise(resolve, reject, error, res) {
@@ -26,7 +26,6 @@ function get(key) {
     return new Promise((resolve, reject) => {
         client.get(key, (error, res) => {
             inPromise(resolve, reject, error, res);
-
         });
     });
 }
@@ -39,4 +38,27 @@ function del(key) {
     });
 }
 
-module.exports = { set, get, del };
+function bulkDelete(key, cursor = "0") {
+    client.scan(cursor, "MATCH", key, (error, res) => {
+        if (error) {
+            throw error;
+        }
+        cursor = res[0];
+        res[1].forEach((matchedKey) => {
+            client.del(matchedKey, (err, delRes) => {
+                if (err) {
+                    throw err;
+                }
+            });
+        });
+
+        if (cursor === "0") {
+            return console.log("Scan Complete");
+        }
+
+        return scan(key, cursor);
+    });
+}
+
+
+module.exports = { set, get, del, bulkDelete };

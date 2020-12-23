@@ -125,12 +125,14 @@ async function getPreviewItem(rankedList) {
     currentPreview.picture = picture;
 
     const commentPreview = await sql.poolQuery(queries.getCommentPreview(listId));
+
     if (commentPreview.length) {
         currentPreview.commentPreview = {
             comment: commentPreview[0].comment,
             profilePic: commentPreview[0].profilePic,
             username: commentPreview[0].username,
-            dateCreated: commentPreview[0].dateCreated,
+            userId: commentPreview[0].userId,
+            dateCreated: commentPreview[0].dateCreated
         };
     }
     return currentPreview;
@@ -146,13 +148,14 @@ async function getDiscoverLists(page, sort) {
         sql.poolQuery(queries.countDiscoveryQuery()),
     ]);
 
+
     const discoverPreviews = await getRankedListPreviews(discoverLists);
     return [discoverPreviews, itemCount[0].itemCount];
 }
 
-async function getLikedLists(userId, page) {
+async function getLikedLists(userId, page, sort) {
     const [likedLists, itemCount] = await Promise.all([
-        sql.poolQuery(queries.getLikedListsQuery(userId, utils.limitAndOffset(page))),
+        sql.poolQuery(queries.getLikedListsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))),
         sql.poolQuery(queries.countLikedListsQuery(userId)),
     ]);
 

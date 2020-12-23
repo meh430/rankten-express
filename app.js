@@ -14,6 +14,12 @@ app.use(express.urlencoded());
 app.use(cors());
 app.use(errors.errorHandler);
 
+app.use((req, res, next) => {
+    console.log(req.method + ": " + req.originalUrl);
+    console.log(req.body);
+    next();
+})
+
 async function init() {
     try {
         const connection = await sql.getConnection();

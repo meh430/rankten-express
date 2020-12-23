@@ -1,17 +1,34 @@
 const redisCache = require("../redisCache");
+const url = require("url");
 
 function getRouteCacher(slashSplit, ex = 3600, private = false) {
     const routeCacher = async (req, res, next) => {
         try {
-            const keyName = private ? `user-${req.user.userId}:${req.originalUrl}` : req.originalUrl;
+            let cleanUrl = req.originalUrl;
+            if (req.query.re) {
+                const currentUrl = new url.URL(
+                    req.originalUrl,
+                    url.format({
+                        protocol: req.protocol,
+                        host: req.get("host"),
+                    })
+                );
+                currentUrl.searchParams.delete("re");
+                cleanUrl = `${currentUrl.pathname}${currentUrl.search}`;
+                console.log("CLEAN", cleanUrl);
+            }
+
+            const keyName = private ? `user-${req.user.userId}:${cleanUrl}` : cleanUrl;
             const baseName = private
-                ? `user-${req.user.userId}:${req.originalUrl.split("/", slashSplit).join("/")}`
-                : req.originalUrl.split("/", slashSplit).join("/");
+                ? `user-${req.user.userId}:${cleanUrl.split("/", slashSplit).join("/")}`
+                : cleanUrl.split("/", slashSplit).join("/");
+            
+            console.log("KEY", keyName);
+            console.log("BASE", baseName);
 
             // if refreshing, delete cached route and move on
             if (req.query.re) {
-                const numDeleted = await redisCache.del(baseName + "*");
-                console.log(numDeleted);
+                redisCache.bulkDelete(baseName + "*");
                 cacheSent(res, keyName, ex);
                 return next();
             }
@@ -38,9 +55,8 @@ function cacheSent(res, keyName, ex) {
     console.log("CACHING...");
     const send = res.send;
     res.send = (body) => {
-        redisCache
-            .set(keyName, JSON.stringify(body), ex)
-            .catch((error) => next());
+        //console.log(body);
+        redisCache.set(keyName, JSON.stringify(body), ex).catch((error) => next());
         res.send = send;
         res.send(body);
     };

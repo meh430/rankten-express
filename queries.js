@@ -145,7 +145,7 @@ function getDiscoverQuery(page, sort) {
 }
 
 function countDiscoveryQuery() {
-    return mysql.format("SELECT COUNT(listId) AS itemCount FROM RankedLists");
+    return mysql.format("SELECT COUNT(listId) AS itemCount FROM RankedLists WHERE private = false");
 }
 
 function unfollowQuery(userId, targetId) {
@@ -188,7 +188,7 @@ function getListLikersQuery(listId) {
     return mysql.format(
         userPreviewAttributes +
             "FROM ListLikes JOIN Users ON " +
-            "ListLikes.userId = Users.userId WHERE ListLikes.userId = ?",
+            "ListLikes.userId = Users.userId WHERE ListLikes.listId = ?",
         [listId]
     );
 }
@@ -201,12 +201,12 @@ function likeCommentQuery(userId, commentId) {
     return mysql.format("INSERT INTO CommentLikes SET userId = ?, commentId = ?", [userId, commentId]);
 }
 
-function getLikedListsQuery(userId, page) {
+function getLikedListsQuery(userId, page, sort) {
     return mysql.format(
         rankedListAttributes +
             "FROM ListLikes JOIN RankedLists ON ListLikes.listId = RankedLists.listId " +
             "JOIN Users ON RankedLists.userId = Users.userId WHERE ListLikes.userId = ?" +
-            pager(page),
+            sortAndPage(page, sort),
         [userId]
     );
 }
@@ -215,12 +215,12 @@ function countLikedListsQuery(userId) {
     return mysql.format("SELECT COUNT(listId) AS itemCount FROM ListLikes WHERE userId = ?", [userId]);
 }
 
-function getLikedCommentsQuery(userId, page) {
+function getLikedCommentsQuery(userId, page, sort) {
     return mysql.format(
         commentAttributes +
             "FROM CommentLikes JOIN Comments ON CommentLikes.commentId = Comments.commentId " +
             "JOIN Users ON Comments.userId = Users.userId WHERE CommentLikes.userId = ?" +
-            pager(page),
+            sortAndPage(page, sort),
         [userId]
     );
 }
@@ -268,7 +268,7 @@ function deleteListRankItemsQuery(listId) {
 
 function getCommentPreview(listId) {
     return mysql.format(
-        "SELECT Comments.comment, Comments.dateCreated, Users.username, " +
+        "SELECT Users.userId, Comments.comment, Comments.dateCreated, Users.username, " +
             "Users.profilePic FROM Comments JOIN Users ON " +
             "Comments.userId = Users.userId WHERE Comments.listId = ? LIMIT 1",
         [listId]
