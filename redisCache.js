@@ -56,7 +56,7 @@ function bulkDelete(key, cursor = "0") {
             return console.log("Scan Complete");
         }
 
-        return scan(key, cursor);
+        return bulkDelete(key, cursor);
     });
 }
 
