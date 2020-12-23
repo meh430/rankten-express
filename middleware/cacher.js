@@ -44,6 +44,7 @@ function getRouteCacher(slashSplit, ex = 3600, private = false) {
 
             next();
         } catch (error) {
+            console.log("CACHE ERROR", error);
             return next();
         }
     };
@@ -56,7 +57,7 @@ function cacheSent(res, keyName, ex) {
     const send = res.send;
     res.send = (body) => {
         //console.log(body);
-        redisCache.set(keyName, JSON.stringify(body), ex).catch((error) => next());
+        redisCache.set(keyName, JSON.stringify(body), ex);
         res.send = send;
         res.send(body);
     };

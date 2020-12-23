@@ -6,7 +6,17 @@ client.on("error", (error) => {
     console.error(error);
 });
 
+function checkConnection(reject) {
+    const connectionErr = new Error("redis disconnected");
+    if (!client.connected && reject) {
+        reject(connectionErr);
+    } else if (!client.connected && !reject) {
+        throw connectionErr;
+    }
+}
+
 function inPromise(resolve, reject, error, res) {
+
     if (error) {
         reject(error);
     }
@@ -16,6 +26,7 @@ function inPromise(resolve, reject, error, res) {
 
 function set(key, value, ex = 3600) {
     return new Promise((resolve, reject) => {
+        checkConnection(reject);
         client.setex(key, ex, value, (error, res) => {
             inPromise(resolve, reject, error, res);
         });
@@ -24,6 +35,8 @@ function set(key, value, ex = 3600) {
 
 function get(key) {
     return new Promise((resolve, reject) => {
+            checkConnection(reject);
+
         client.get(key, (error, res) => {
             inPromise(resolve, reject, error, res);
         });
@@ -32,6 +45,8 @@ function get(key) {
 
 function del(key) {
     return new Promise((resolve, reject) => {
+                checkConnection(reject);
+
         client.del(key, (error, res) => {
             inPromise(resolve, reject, error, res);
         });
@@ -39,6 +54,7 @@ function del(key) {
 }
 
 function bulkDelete(key, cursor = "0") {
+    checkConnection();
     client.scan(cursor, "MATCH", key, (error, res) => {
         if (error) {
             throw error;
