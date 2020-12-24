@@ -49,6 +49,7 @@ async function getLikedComments(userId, page, sort) {
         sql.poolQuery(queries.getLikedCommentsQuery(userId, utils.limitAndOffset(page), utils.getSort(sort))),
         sql.poolQuery(queries.countLikedCommentsQuery(userId)),
     ]);
+
     
     return [comments, itemCount[0].itemCount];
 }

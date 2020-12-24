@@ -77,7 +77,7 @@ async function updateRankedList(listId, userId, rankedList) {
                     throw errors.badRequest();
                 }
             } else {
-                await rankItemDao.createRankItem(connection, rankItem, listId, rankedList.title, rankedList.private);
+                await rankItemDao.createRankItem(connection, rankItems[i], listId, rankedList.title, rankedList.private);
             }
         }
     });

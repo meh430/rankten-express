@@ -24,6 +24,8 @@ module.exports = (app) => {
                 "listId"
             );
 
+
+            console.log(result);
             res.status(200).send({ message: result + " list" });
         })
     );
@@ -50,6 +52,8 @@ module.exports = (app) => {
                 queries.unlikeCommentQuery,
                 "commentId"
             );
+
+            console.log(result);
 
             res.status(200).send({ message: result + " comment" });
         })
