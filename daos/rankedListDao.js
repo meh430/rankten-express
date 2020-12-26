@@ -182,13 +182,13 @@ async function getFeed(userId) {
     const lastDay = Date.now() - 24 * 60 * 60 * 1000;
     const feedList = [];
     const followingIds = utils.getOnePropArray(
-        await sql.poolQuery.query(queries.getFollowingIdsQuery(userId)),
+        await sql.poolQuery(queries.getFollowingIdsQuery(userId)),
         "followsId"
     );
 
     for (let i = 0; i < followingIds.length; i++) {
-        feedList.push(
-            await getRankedListPreviews(await sql.poolQuery(queries.getFeedQuery(followingIdsp[i], lastDay)))
+        feedList.concat(
+            await getRankedListPreviews(await sql.poolQuery(queries.getFeedQuery(followingIds[i], lastDay)))
         );
     }
 
