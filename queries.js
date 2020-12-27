@@ -363,6 +363,20 @@ function searchListsQuery(query, page, sort) {
     );
 }
 
+function updateRankPoints(userId, increment) {
+    return mysql.format(
+        "UPDATE Users SET rankPoints = rankPoints " +
+            (increment ? "+" : "-") +
+            " 1 " +
+            "WHERE userId = ? AND rankPoints >= "(increment ? "0" : "1"),
+        [userId]
+    );
+}
+
+function getComment(commentId) {
+    return mysql.format("SELECT * FROM Comments WHERE commentId = ?", [commentId]);
+}
+
 module.exports = {
     createUserQuery,
     deleteUserQuery,
@@ -424,4 +438,6 @@ module.exports = {
     countLikedListsQuery,
     countLikedCommentsQuery,
     countUserListsQuery,
+    updateRankPoints,
+    getComment
 };

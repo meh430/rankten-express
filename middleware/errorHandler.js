@@ -9,6 +9,7 @@ function errorRes(message, status) {
 }
 
 function errorHandler(err, req, res, next) {
+    console.log(err.message);
     switch (err.message) {
         case "unauthorized":
             return res.status(401).send(errorRes("Invalid username or password", 401));
@@ -22,7 +23,6 @@ function errorHandler(err, req, res, next) {
             console.log(err);
             return res.status(500).send(errorRes("Something went wrong", 500));
     }
-
 }
 
 function authError() {

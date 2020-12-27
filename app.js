@@ -12,8 +12,6 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
-app.use(errors.errorHandler);
-
 app.use((req, res, next) => {
     console.log(req.method + ": " + req.originalUrl);
     console.log(req.body);
@@ -36,12 +34,13 @@ async function init() {
         });
 
         routes(app);
+        app.use(errors.errorHandler);
     } catch (error) {
         console.log(error);
     }
 }
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`App listening at http://localhost:${port}`);
 });
 

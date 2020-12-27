@@ -10,14 +10,17 @@ async function createComment(comment, userId, listId) {
     comment.dateCreated = Date.now();
 
     const res = await sql.poolQuery(queries.createCommentQuery(comment));
-
-    return res.insertId;
+    const createdComment = await sql.poolQuery(queries.getComment(res.insertId));
+    utils.checkIfFound(createdComment);
+    return createdComment;
 }
 
 async function updateComment(commentId, userId, comment) {
     const res = await sql.poolQuery(queries.updateCommentQuery(commentId, userId, comment));
-
     utils.checkRow(res);
+    const updatedComment = await sql.poolQuery(queries.getComment(commentId));
+    utils.checkIfFound(updatedComment);
+    return updatedComment;
 }
 
 async function deleteComment(commentId, userId) {

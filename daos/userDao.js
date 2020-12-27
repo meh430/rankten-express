@@ -129,21 +129,27 @@ async function getFollowers(userId) {
 // unlikeListQuery, likeListQuery, unlikeCommentQuery, likeCommentQuery
 // idsProperty: "commentId" or "listId"
 async function likeUnlike(userId, targetId, idsQuery, likeQuery, unlikeQuery, idProperty) {
-    const likedIds = utils.getOnePropArray(await sql.poolQuery(idsQuery(userId)), idProperty);
+    const likeTransaction = new Promise((resolve, reject) => {
+        sql.performTransaction(async (connection) => {
+            const likedIds = utils.getOnePropArray(await sql.query(connection, idsQuery(userId)), idProperty);
 
-    if (likedIds.includes(targetId)) {
-        const unliked = await sql.poolQuery(unlikeQuery(userId, targetId));
+            if (likedIds.includes(targetId)) {
+                const unliked = await sql.query(connection, unlikeQuery(userId, targetId));
+                utils.checkRow(unliked);
+                await sql.query(connection, queries.updateRankPoints(targetId, false));
 
-        utils.checkRow(unliked);
+                resolve("unliked");
+            } else {
+                const liked = await sql.query(connection, likeQuery(userId, targetId));
+                utils.checkRow(liked);
+                await sql.query(connection, queries.updateRankPoints(targetId, true));
 
-        return "unliked";
-    } else {
-        const liked = await sql.poolQuery(likeQuery(userId, targetId));
+                resolve("liked");
+            }
+        });
+    });
 
-        utils.checkRow(liked);
-
-        return "liked";
-    }
+    return await likeTransaction;
 }
 
 async function getListLikers(listId) {
