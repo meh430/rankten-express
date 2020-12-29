@@ -380,7 +380,17 @@ function getComment(commentId) {
         "WHERE Comments.commentId = ?", [commentId]);
 }
 
+function getListOwner(listId) {
+    return mysql.format("SELECT userId FROM RankedLists WHERE listId = ?", [listId]);
+}
+
+function getCommentOwner(commentId) {
+    return mysql.format("SELECT userId FROM Comments WHERE commentId = ?", [commentId]);
+}
+
 module.exports = {
+    getCommentOwner,
+    getListOwner,
     createUserQuery,
     deleteUserQuery,
     updateUserQuery,

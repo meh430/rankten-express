@@ -4,8 +4,8 @@ const sql = require("../sqlPromise");
 const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
-const namePattern = /^[a-z0-9_-]{3,15}$/g;
-const passwordPattern = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/g;
+const namePattern = /^[a-zA-Z0-9_#?!@$ %^&*-]{3,}$/g;
+const passwordPattern = /^[a-zA-Z0-9_#?!@$ %^&*-]{6,}$/g;
 
 // TODO: do not found checks in getters
 
@@ -132,18 +132,22 @@ async function likeUnlike(userId, targetId, idsQuery, likeQuery, unlikeQuery, id
     const likeTransaction = new Promise((resolve, reject) => {
         sql.performTransaction(async (connection) => {
             const likedIds = utils.getOnePropArray(await sql.query(connection, idsQuery(userId)), idProperty);
-
+            const ownerId =
+                idProperty == "listId"
+                    ? await sql.query(connection, queries.getListOwner(targetId))
+                    : await sql.query(connection, queries.getCommentOwner(targetId));
+            
             if (likedIds.includes(targetId)) {
                 const unliked = await sql.query(connection, unlikeQuery(userId, targetId));
                 utils.checkRow(unliked);
-                await sql.query(connection, queries.updateRankPoints(targetId, false));
+                await sql.query(connection, queries.updateRankPoints(ownerId[0].userId, false));
 
                 resolve("unliked");
             } else {
                 const liked = await sql.query(connection, likeQuery(userId, targetId));
                 utils.checkRow(liked);
-                await sql.query(connection, queries.updateRankPoints(targetId, true));
-
+                await sql.query(connection, queries.updateRankPoints(ownerId[0].userId, true));
+                console.log(userId, targetId);
                 resolve("liked");
             }
         });

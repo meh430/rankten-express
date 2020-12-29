@@ -68,4 +68,5 @@ function getPagingInfo(items, itemCount, page, itemLimit=10) {
     return { lastPage, items };
 }
 
+
 module.exports = { limitAndOffset, getSort, validatePage, checkRow, checkIfFound, getOnePropArray, asyncForEach, hoursToSec, getPagingInfo };
