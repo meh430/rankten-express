@@ -64,7 +64,7 @@ async function updateRankedList(listId, userId, rankedList) {
         }
 
         for (let i = 0; i < rankItems.length; i++) {
-            if ("itemId" in rankItems[i]) {
+            if ("itemId" in rankItems[i] && rankItems[i].itemId) {
                 if (currentItemIds.includes(rankItems[i].itemId)) {
                     await rankItemDao.updateRankItem(
                         connection,
@@ -77,7 +77,13 @@ async function updateRankedList(listId, userId, rankedList) {
                     throw errors.badRequest();
                 }
             } else {
-                await rankItemDao.createRankItem(connection, rankItems[i], listId, rankedList.title, rankedList.private);
+                await rankItemDao.createRankItem(
+                    connection,
+                    rankItems[i],
+                    listId,
+                    rankedList.title,
+                    rankedList.private
+                );
             }
         }
     });
@@ -132,7 +138,7 @@ async function getPreviewItem(rankedList) {
             profilePic: commentPreview[0].profilePic,
             username: commentPreview[0].username,
             userId: commentPreview[0].userId,
-            dateCreated: commentPreview[0].dateCreated
+            dateCreated: commentPreview[0].dateCreated,
         };
     }
     return currentPreview;
@@ -147,7 +153,6 @@ async function getDiscoverLists(page, sort) {
         sql.poolQuery(queries.getDiscoverQuery(utils.limitAndOffset(page), utils.getSort(sort))),
         sql.poolQuery(queries.countDiscoveryQuery()),
     ]);
-
 
     const discoverPreviews = await getRankedListPreviews(discoverLists);
     return [discoverPreviews, itemCount[0].itemCount];
@@ -181,15 +186,10 @@ async function getUserLists(userId, page, sort, all = false) {
 async function getFeed(userId) {
     const lastDay = Date.now() - 24 * 60 * 60 * 1000;
     const feedList = [];
-    const followingIds = utils.getOnePropArray(
-        await sql.poolQuery(queries.getFollowingIdsQuery(userId)),
-        "followsId"
-    );
-
+    const followingIds = utils.getOnePropArray(await sql.poolQuery(queries.getFollowingIdsQuery(userId)), "followsId");
     for (let i = 0; i < followingIds.length; i++) {
-        feedList.concat(
-            await getRankedListPreviews(await sql.poolQuery(queries.getFeedQuery(followingIds[i], lastDay)))
-        );
+        const lists = await getRankedListPreviews(await sql.poolQuery(queries.getFeedQuery(followingIds[i], lastDay)));
+        lists.forEach(list => feedList.push(list));
     }
 
     return feedList;

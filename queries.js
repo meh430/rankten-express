@@ -368,13 +368,16 @@ function updateRankPoints(userId, increment) {
         "UPDATE Users SET rankPoints = rankPoints " +
             (increment ? "+" : "-") +
             " 1 " +
-            "WHERE userId = ? AND rankPoints >= "(increment ? "0" : "1"),
+            "WHERE userId = ? AND rankPoints >= " + (increment ? "0" : "1"),
         [userId]
     );
 }
 
 function getComment(commentId) {
-    return mysql.format("SELECT * FROM Comments WHERE commentId = ?", [commentId]);
+    return mysql.format(
+        commentAttributes +
+        "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
+        "WHERE Comments.commentId = ?", [commentId]);
 }
 
 module.exports = {
