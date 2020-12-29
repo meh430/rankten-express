@@ -121,7 +121,7 @@ module.exports = (app) => {
                 );
             } else {
                 const feed = await rankedlistDao.getFeed(req.user.userId);
-                await redisCache.set(keyName, JSON.stringify(feed), utils.hoursToSec(2));
+                await redisCache.set(keyName, JSON.stringify(feed), utils.hoursToSec(4));
                 res.status(200).send(
                     utils.getPagingInfo(
                         feed.slice(req.params.page * 10, req.params.page * 10 + 10),

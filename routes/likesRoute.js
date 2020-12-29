@@ -33,7 +33,7 @@ module.exports = (app) => {
     // Returns all users that liked a list
     app.get(
         "/like/:listId",
-        [parameters.parseParameters, cacher(3, utils.hoursToSec(2))],
+        [parameters.parseParameters, cacher(3, utils.hoursToSec(1))],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(await userDao.getListLikers(req.params.listId));
         })
@@ -62,7 +62,7 @@ module.exports = (app) => {
     // Returns all comments liked by user
     app.get(
         "/liked_comments/:page/:sort",
-        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
+        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(1), true)],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(
                 utils.getPagingInfo(
@@ -76,7 +76,7 @@ module.exports = (app) => {
     // Returns all lists liked by user
     app.get(
         "/likes/:page/:sort",
-        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(2), true)],
+        [expressJwt(jwtSecret), parameters.parseParameters, cacher(2, utils.hoursToSec(1), true)],
         errors.asyncError(async (req, res, next) => {
             res.status(200).send(
                 utils.getPagingInfo(
