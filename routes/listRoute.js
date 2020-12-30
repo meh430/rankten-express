@@ -6,7 +6,6 @@ const rankedlistDao = require("../daos/rankedListDao");
 const redisCache = require("../redisCache");
 const cacher = require("../middleware/cacher");
 const utils = require("../utils");
-const sql = require("../sqlPromise");
 
 module.exports = (app) => {
     app.get(
