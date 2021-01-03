@@ -4,8 +4,8 @@ const sql = require("../sqlPromise");
 const errors = require("../middleware/errorHandler");
 const utils = require("../utils");
 
-const namePattern = /^[a-zA-Z0-9_#?!@$ %^&*-]{3,}$/g;
-const passwordPattern = /^[a-zA-Z0-9_#?!@$ %^&*-]{6,}$/g;
+const namePattern = /^[a-zA-Z0-9_#?!@$ %^&*-]{3,15}$/g;
+const passwordPattern = /^[a-zA-Z0-9_#?!@$ %^&*-]{6,20}$/g;
 
 // TODO: do not found checks in getters
 

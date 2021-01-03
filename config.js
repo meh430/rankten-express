@@ -15,4 +15,9 @@ exports.poolConfig = {
     supportBigNumbers: true
 };
 
-exports.redisConfig = {};
+const redisConfig = { url: process.env.REDIS_URL }
+if (process.env.REDIS_PASSWORD) {
+    redisConfig.password = process.env.REDIS_PASSWORD;
+}
+
+exports.redisConfig = redisConfig;

@@ -20,8 +20,11 @@ function errorHandler(err, req, res, next) {
         case "invalid page":
             return res.status(400).send(errorRes("Trying to access a page that does not exist", 400));
         default:
-            console.log(err);
-            return res.status(500).send(errorRes("Something went wrong", 500));
+            if (err.code == "ECONNREFUSED") {
+                return res.status(500).send(errorRes("No connection to database", 500));
+            } else {
+                return res.status(500).send(errorRes("Something went wrong", 500));
+            }
     }
 }
 

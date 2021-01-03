@@ -7,7 +7,7 @@ const routes = require("./routes/index");
 const errors = require("./middleware/errorHandler");
 
 const app = express();
-const port = process.env.PORT ? process.env.PORT : 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded());
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
     console.log(req.method + ": " + req.originalUrl);
     console.log(req.body);
     next();
-})
+});
 
 async function init() {
     try {
@@ -28,17 +28,17 @@ async function init() {
         await models.initializeTables(connection);
 
         connection.release();
-
-        app.get("/", (req, res) => {
-            res.status(200).send({ message: "Hello World!" });
-        });
-
-        routes(app);
-        app.use(errors.errorHandler);
     } catch (error) {
         console.log(error);
     }
 }
+
+app.get("/", (req, res) => {
+    res.status(200).send({ message: "Hello World!" });
+});
+
+routes(app);
+app.use(errors.errorHandler);
 
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
