@@ -319,46 +319,43 @@ function getFeedQuery(userId, lastDay) {
 }
 
 function countSearchUsersQuery(query) {
-    return mysql.format(
-        "SELECT COUNT(Users.userId) AS itemCount FROM Users " +
-            "WHERE MATCH(Users.username, Users.bio) AGAINST(? IN NATURAL LANGUAGE MODE)",
-        [query]
+    query = escapeQuery(query);
+    return (
+        "SELECT COUNT(userId) AS itemCount FROM Users WHERE username LIKE '%" +
+        query +
+        "%' OR bio LIKE '%" +
+        query +
+        "%'"
     );
 }
 
 function searchUsersQuery(query, page, sort) {
+    query = escapeQuery(query);
+
     return (
         userPreviewAttributes +
-        mysql.format(
-            "FROM Users WHERE MATCH(Users.username, Users.bio) " +
-                "AGAINST(? IN NATURAL LANGUAGE MODE)" +
-                sortAndPage(page, sort),
-            [query]
-        )
-    );
-}
-
-function searchRankItemsQuery(query) {
-    return mysql.format(
-        "SELECT RankItems.listId AS lId FROM RankItems " +
-            "WHERE RankItems.private = false AND " +
-            "MATCH(RankItems.listTitle, RankItems.itemName, RankItems.description) " +
-            "AGAINST(? IN NATURAL LANGUAGE MODE) GROUP BY RankItems.listId",
-        [query]
+        "FROM Users WHERE username LIKE '%" +
+        query +
+        "%' OR bio LIKE '%" +
+        query +
+        "%'" +
+        sortAndPage(page, sort)
     );
 }
 
 function countSearchListsQuery(query) {
-    return "SELECT COUNT(Lists.lId) AS itemCount FROM (" + searchRankItemsQuery(query) + ") AS Lists";
+    query = escapeQuery(query);
+    return "SELECT COUNT(listId) AS itemCount FROM RankedLists WHERE title LIKE '%" + query + "%'";
 }
 
 function searchListsQuery(query, page, sort) {
+    query = escapeQuery(query);
     return (
         rankedListAttributes +
-        "FROM (" +
-        searchRankItemsQuery(query) +
-        ") AS search JOIN RankedLists ON search.lId = RankedLists.listId " +
-        "JOIN Users ON RankedLists.userId = Users.userId" +
+        "FROM RankedLists JOIN Users ON RankedLists.userId = Users.userId " +
+        "WHERE RankedLists.title LIKE '%" +
+        query +
+        "%'" +
         sortAndPage(page, sort)
     );
 }
@@ -368,7 +365,8 @@ function updateRankPoints(userId, increment) {
         "UPDATE Users SET rankPoints = rankPoints " +
             (increment ? "+" : "-") +
             " 1 " +
-            "WHERE userId = ? AND rankPoints >= " + (increment ? "0" : "1"),
+            "WHERE userId = ? AND rankPoints >= " +
+            (increment ? "0" : "1"),
         [userId]
     );
 }
@@ -376,8 +374,10 @@ function updateRankPoints(userId, increment) {
 function getComment(commentId) {
     return mysql.format(
         commentAttributes +
-        "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
-        "WHERE Comments.commentId = ?", [commentId]);
+            "FROM Comments JOIN Users ON Comments.userId = Users.userId " +
+            "WHERE Comments.commentId = ?",
+        [commentId]
+    );
 }
 
 function getListOwner(listId) {
@@ -386,6 +386,12 @@ function getListOwner(listId) {
 
 function getCommentOwner(commentId) {
     return mysql.format("SELECT userId FROM Comments WHERE commentId = ?", [commentId]);
+}
+
+function escapeQuery(query) {
+    query = mysql.escape(query);
+    console.log(query.substring(1, query.length - 1));
+    return query.substring(1, query.length - 1);
 }
 
 module.exports = {
@@ -439,7 +445,6 @@ module.exports = {
     getFeedQuery,
     countSearchUsersQuery,
     searchUsersQuery,
-    searchRankItemsQuery,
     countSearchListsQuery,
     searchListsQuery,
     pager,
@@ -452,5 +457,5 @@ module.exports = {
     countLikedCommentsQuery,
     countUserListsQuery,
     updateRankPoints,
-    getComment
+    getComment,
 };

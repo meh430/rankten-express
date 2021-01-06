@@ -14,7 +14,7 @@ app.use(express.urlencoded());
 app.use(cors());
 app.use((req, res, next) => {
     console.log(req.method + ": " + req.originalUrl);
-    console.log(req.body);
+    //console.log(req.body);
     next();
 });
 

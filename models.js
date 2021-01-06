@@ -8,8 +8,7 @@ const createUsersTable =
     "password varchar(100) NOT NULL," +
     "bio TEXT," +
     "profilePic TEXT," +
-    "rankPoints int DEFAULT 0," +
-    "FULLTEXT KEY (username, bio)) ENGINE=MyISAM;";
+    "rankPoints int DEFAULT 0) ENGINE=InnoDB;";
 
 const createRankedListsTable =
     "CREATE TABLE IF NOT EXISTS RankedLists(" +
@@ -18,8 +17,7 @@ const createRankedListsTable =
     "dateCreated bigint NOT NULL," +
     "title varchar(50) NOT NULL," +
     "private bool NOT NULL DEFAULT 0," +
-    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FULLTEXT KEY (title)) ENGINE=MyISAM;";
+    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE) ENGINE=InnoDB;";
 
 const createRankItemsTable =
     "CREATE TABLE IF NOT EXISTS RankItems(" +
@@ -31,8 +29,7 @@ const createRankItemsTable =
     "itemName varchar(50) NOT NULL," +
     "description TEXT," +
     "picture TEXT," +
-    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE," +
-    "FULLTEXT KEY (listTitle, itemName, description)) ENGINE=MyISAM;";
+    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE) ENGINE=InnoDB;";
 
 const commentsTable =
     "CREATE TABLE IF NOT EXISTS Comments(" +
@@ -42,27 +39,27 @@ const commentsTable =
     "dateCreated bigint NOT NULL," +
     "comment TEXT NOT NULL," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE) ENGINE=MyISAM;";
+    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE) ENGINE=InnoDB;";
 
 const createListLikesTable =
     "CREATE TABLE IF NOT EXISTS ListLikes(" +
     "userId int NOT NULL," +
     "listId int NOT NULL," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE) ENGINE=MyISAM;";
+    "FOREIGN KEY (listId) REFERENCES RankedLists(listId) ON DELETE CASCADE) ENGINE=InnoDB;";
 
 const createCommentLikesTable =
     "CREATE TABLE IF NOT EXISTS CommentLikes(" +
     "userId int NOT NULL," +
     "commentId int NOT NULL," +
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE," +
-    "FOREIGN KEY (commentId) REFERENCES Comments(commentId) ON DELETE CASCADE) ENGINE=MyISAM;";
+    "FOREIGN KEY (commentId) REFERENCES Comments(commentId) ON DELETE CASCADE) ENGINE=InnoDB;";
 
 const createFollowsTable =
     "CREATE TABLE IF NOT EXISTS Follows(" +
     "userId int NOT NULL," +
     "followsId int NOT NULL," +
-    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE) ENGINE=MyISAM;";
+    "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE) ENGINE=InnoDB;";
 
 async function initializeTables(connection) {
     await sql.query(connection, createUsersTable);

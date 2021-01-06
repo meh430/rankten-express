@@ -45,7 +45,7 @@ module.exports = (app) => {
 
 function getQuery(req) {
     const query = req.query.q;
-    if (!query || query.length < 3) {
+    if (!query || query.length <= 0) {
         return "";
     }
 
