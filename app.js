@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 routes(app);
 app.use(errors.errorHandler);
 
-app.listen(port, () => {
+app.listen(port,  () => {
     console.log(`App listening at http://localhost:${port}`);
 });
 

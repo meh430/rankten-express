@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    links:
+      - "db:db"
+      - "redis:redis"
+    depends_on:
+      - db
+      - redis
+    environment:
+      MYSQL_HOST: "${MYSQL_HOST}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      REDIS_URL: "${REDIS_URL}"
+      PORT: "${PORT}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_ALGO: "${JWT_ALGO}"
+    ports:
+      - 3000:3000
+    
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_HOST: "${MYSQL_HOST}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+    volumes:
+      - mysql-db:/var/lib/mysql
+  
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    expose:
+      - 6379
+volumes:
+  mysql-db:
