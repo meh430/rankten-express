@@ -25,6 +25,7 @@ async function init() {
         //await sql.query(connection, "DROP DATABASE rank_ten");
         //await sql.query(connection, "CREATE DATABASE IF NOT EXISTS rank_ten");
         //await sql.query(connection, "USE rank_ten");
+        await sql.query(connection, `ALTER DATABASE ${process.env.MYSQL_DATABASE} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci`);
         await models.initializeTables(connection);
 
         connection.release();
@@ -40,7 +41,7 @@ app.get("/", (req, res) => {
 routes(app);
 app.use(errors.errorHandler);
 
-app.listen(port,  () => {
+app.listen(port, '0.0.0.0',  () => {
     console.log(`App listening at http://localhost:${port}`);
 });
 
