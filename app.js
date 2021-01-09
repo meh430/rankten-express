@@ -27,7 +27,6 @@ async function init() {
         //await sql.query(connection, "USE rank_ten");
         await sql.query(connection, `ALTER DATABASE ${process.env.MYSQL_DATABASE} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci`);
         await models.initializeTables(connection);
-
         connection.release();
     } catch (error) {
         console.log(error);
