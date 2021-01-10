@@ -1,5 +1,7 @@
 const sql = require("./sqlPromise");
 
+const tableSettings = " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;";
+
 const createUsersTable =
     "CREATE TABLE IF NOT EXISTS Users(" +
     "userId int NOT NULL PRIMARY KEY AUTO_INCREMENT," +
@@ -8,7 +10,7 @@ const createUsersTable =
     "password varchar(100) NOT NULL," +
     "bio TEXT," +
     "profilePic TEXT," +
-    "rankPoints int DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;";
+    "rankPoints int DEFAULT 0)";
 
 const createRankedListsTable =
     "CREATE TABLE IF NOT EXISTS RankedLists(" +
@@ -62,13 +64,13 @@ const createFollowsTable =
     "FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;";
 
 async function initializeTables(connection) {
-    await sql.query(connection, createUsersTable);
-    await sql.query(connection, createRankedListsTable);
-    await sql.query(connection, createRankItemsTable);
-    await sql.query(connection, commentsTable);
-    await sql.query(connection, createListLikesTable);
-    await sql.query(connection, createCommentLikesTable);
-    await sql.query(connection, createFollowsTable);
+    await sql.query(connection, createUsersTable + tableSettings);
+    await sql.query(connection, createRankedListsTable + tableSettings);
+    await sql.query(connection, createRankItemsTable + tableSettings);
+    await sql.query(connection, commentsTable + tableSettings);
+    await sql.query(connection, createListLikesTable + tableSettings);
+    await sql.query(connection, createCommentLikesTable + tableSettings);
+    await sql.query(connection, createFollowsTable + tableSettings);
 }
 
 module.exports = { initializeTables };
